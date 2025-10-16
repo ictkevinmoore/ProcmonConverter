@@ -1,0 +1,14 @@
+build: update .NET build artifacts with new commit hash
+
+Updates auto-generated assembly information files in the Debug/net9.0
+build output directory. The AssemblyInformationalVersion attribute now
+references commit 1250f16 instead of 12f5d76, reflecting the latest
+source code state used for the build.
+
+Files modified:
+- dotnet-test.AssemblyInfo.cs: Updated version metadata
+- dotnet-test.AssemblyInfoInputs.cache: Updated cache hash
+
+Note: These obj/ directory files are typically excluded from version
+control via .gitignore. Consider adding them to .gitignore to prevent
+tracking build artifacts.
