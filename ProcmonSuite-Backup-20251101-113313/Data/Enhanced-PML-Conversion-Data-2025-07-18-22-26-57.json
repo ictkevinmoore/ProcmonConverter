@@ -1,0 +1,128 @@
+﻿{
+    "Summary":  {
+                    "MemoryPeakMB":  95.86,
+                    "FailedConversions":  9,
+                    "SuccessRate":  0,
+                    "TotalFiles":  9,
+                    "TotalCsvSizeMB":  0,
+                    "TotalRecords":  0,
+                    "SuccessfulConversions":  0,
+                    "ValidationFailures":  15,
+                    "TotalPmlSizeMB":  2928,
+                    "SkippedFiles":  0,
+                    "RetryCount":  18,
+                    "GeneratedAt":  "2025-07-18 22:30:18",
+                    "ProcessingTimeSeconds":  200.5
+                },
+    "ProcessingStrategies":  {
+                                 "Enhanced":  2,
+                                 "Standard":  4,
+                                 "Large":  3
+                             },
+    "Files":  [
+                  {
+                      "PmlFile":  "capture-2025-07-18-00-00-48.pml",
+                      "PmlSizeMB":  172.7,
+                      "CsvFile":  "capture-2025-07-18-00-00-48.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  12.8,
+                      "Strategy":  "Enhanced",
+                      "Success":  false,
+                      "ErrorMessage":  "CSV file validation failed"
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-00-00-48-chunk-001-of-004.pml",
+                      "PmlSizeMB":  49,
+                      "CsvFile":  "capture-2025-07-18-00-00-48-chunk-001-of-004.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  20.2,
+                      "Strategy":  "Standard",
+                      "Success":  false,
+                      "ErrorMessage":  "Process Monitor returned exit code 1"
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-00-00-48-chunk-002-of-004.pml",
+                      "PmlSizeMB":  49,
+                      "CsvFile":  "capture-2025-07-18-00-00-48-chunk-002-of-004.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  15.6,
+                      "Strategy":  "Standard",
+                      "Success":  false,
+                      "ErrorMessage":  "Process Monitor returned exit code 1"
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-00-00-48-chunk-003-of-004.pml",
+                      "PmlSizeMB":  49,
+                      "CsvFile":  "capture-2025-07-18-00-00-48-chunk-003-of-004.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  12.1,
+                      "Strategy":  "Standard",
+                      "Success":  false,
+                      "ErrorMessage":  "Process Monitor returned exit code 1"
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-00-00-48-chunk-004-of-004.pml",
+                      "PmlSizeMB":  22.7,
+                      "CsvFile":  "capture-2025-07-18-00-00-48-chunk-004-of-004.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  11.6,
+                      "Strategy":  "Standard",
+                      "Success":  false,
+                      "ErrorMessage":  "Process Monitor returned exit code 1"
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-01-16-38.pml",
+                      "PmlSizeMB":  932.71,
+                      "CsvFile":  "capture-2025-07-18-01-16-38.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  48.9,
+                      "Strategy":  "Large",
+                      "Success":  false,
+                      "ErrorMessage":  "CSV file validation failed"
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-02-31-12.pml",
+                      "PmlSizeMB":  594.23,
+                      "CsvFile":  "capture-2025-07-18-02-31-12.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  28,
+                      "Strategy":  "Large",
+                      "Success":  false,
+                      "ErrorMessage":  "CSV file validation failed"
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-04-03-36.pml",
+                      "PmlSizeMB":  674.66,
+                      "CsvFile":  "capture-2025-07-18-04-03-36.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  32.1,
+                      "Strategy":  "Large",
+                      "Success":  false,
+                      "ErrorMessage":  "CSV file validation failed"
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-04-06-39.pml",
+                      "PmlSizeMB":  384,
+                      "CsvFile":  "capture-2025-07-18-04-06-39.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  18.7,
+                      "Strategy":  "Enhanced",
+                      "Success":  false,
+                      "ErrorMessage":  "CSV file validation failed"
+                  }
+              ],
+    "ErrorTypes":  {
+                       "Process Error":  12,
+                       "Validation":  15,
+                       "General":  24
+                   }
+}

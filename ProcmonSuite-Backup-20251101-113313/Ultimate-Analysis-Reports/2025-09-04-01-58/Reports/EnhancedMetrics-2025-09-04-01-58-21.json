@@ -1,0 +1,52 @@
+{
+  "analysis": {
+    "topResults": null,
+    "topProcesses": null,
+    "topOperations": null,
+    "categories": null
+  },
+  "metadata": {
+    "version": "6.0.0-Optimized",
+    "generatedBy": "Enhanced Procmon Analysis Suite v6.0.0",
+    "timestamp": "2025-09-04T01:58:21.7131362-05:00",
+    "processingDuration": {
+      "Ticks": 5382570,
+      "Days": 0,
+      "Hours": 0,
+      "Milliseconds": 538,
+      "Microseconds": 257,
+      "Nanoseconds": 0,
+      "Minutes": 0,
+      "Seconds": 0,
+      "TotalDays": 6.229826388888889E-06,
+      "TotalHours": 0.00014951583333333332,
+      "TotalMilliseconds": 538.257,
+      "TotalMicroseconds": 538257.0,
+      "TotalNanoseconds": 538257000.0,
+      "TotalMinutes": 0.00897095,
+      "TotalSeconds": 0.538257
+    }
+  },
+  "configuration": {
+    "outputDirectory": "Ultimate-Analysis-Reports\\2025-09-04-01-58",
+    "logLevel": "Normal",
+    "circuitBreakerThreshold": 10,
+    "enableRetries": true,
+    "parallelJobs": 8,
+    "enableProfiling": false,
+    "maxMemoryMB": 8192,
+    "batchSize": 50000,
+    "maxFileSizeMB": 1024,
+    "inputDirectory": "Data\\Converted"
+  },
+  "performance": {
+    "processingTimeSeconds": 0.54,
+    "totalFiles": 0,
+    "totalEvents": 0,
+    "totalWarnings": 0,
+    "eventsPerSecond": 0.0,
+    "totalErrors": 0,
+    "memoryPeakMB": 0.0,
+    "errorRate": 0.0
+  }
+}

@@ -1,0 +1,593 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procmon Professional Analysis Report</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --success-color: #198754;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #0dcaf0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+
+        .report-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #0a58ca 100%);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .metric-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .health-score-widget {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 15px;
+            margin: 30px 0 20px 0;
+            font-weight: 600;
+        }
+
+        .insight-card {
+            background: white;
+            border-left: 4px solid var(--info-color);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .recommendation-card {
+            background: white;
+            border-left: 4px solid var(--warning-color);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .pattern-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin: 5px;
+        }
+
+        .severity-high {
+            background-color: #fee;
+            color: #d63384;
+            border: 1px solid #d63384;
+        }
+
+        .severity-medium {
+            background-color: #fff3cd;
+            color: #997404;
+            border: 1px solid #997404;
+        }
+
+        .severity-low {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #0f5132;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+        }
+
+        .risk-matrix {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .risk-cell {
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .risk-critical { background-color: #dc3545; }
+        .risk-high { background-color: #fd7e14; }
+        .risk-medium { background-color: #ffc107; color: #333; }
+        .risk-low { background-color: #20c997; }
+
+        .export-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        @media print {
+            .export-buttons, .no-print { display: none; }
+            body { background-color: white; }
+            .metric-card { break-inside: avoid; }
+        }
+
+        .process-cluster-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+
+        .executive-summary {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .timeline-item {
+            border-left: 3px solid var(--primary-color);
+            padding-left: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="export-buttons no-print">
+            <button class="btn btn-light btn-sm me-2" onclick="window.print()">
+                <i class="fas fa-print"></i> Print
+            </button>
+            <button class="btn btn-light btn-sm" onclick="exportToExcel()">
+                <i class="fas fa-file-excel"></i> Export
+            </button>
+        </div>
+
+        <div class="report-header">
+            <div class="container">
+                <h1 class="display-4"><i class="fas fa-chart-line me-3"></i>Procmon Professional Analysis Report</h1>
+                <p class="lead">Comprehensive System Activity Analysis</p>
+                <p class="mb-0"><i class="far fa-calendar-alt"></i> Generated: November 07, 2025 16:12:55</p>
+            </div>
+        </div>
+<div class="container"><div class="executive-summary">
+<h2 class='section-title'><i class='fas fa-briefcase me-2'></i>Executive Summary <span class="badge bg-secondary">Standard Summary</span></h2>
+<p class='lead'>This report analyzes <strong>534,728</strong> system events captured during the monitoring period.</p>
+<h5>System Health Assessment</h5>
+<p>The system demonstrates <strong>poor</strong> overall health with a score of <strong>33/100</strong>. 
+The elevated error rate of <strong>100%</strong> indicates significant operational issues requiring immediate attention.
+</p>
+<h5>Risk Profile</h5>
+<p>The overall risk level is classified as <strong class='text-danger'>Critical</strong>. 
+This elevated risk profile demands immediate investigation and remediation to prevent potential system instability or security breaches.
+</p>
+<h5>Key Findings</h5><ul>
+<li>Monitored <strong>267364</strong> unique processes across the system</li>
+<li>Recorded <strong>73</strong> distinct operation types</li>
+</ul>
+
+</div></div>
+
+<div class="container mt-4">
+<h2 class="section-title"><i class="fas fa-tachometer-alt me-2"></i>Key Performance Indicators</h2>
+<div class="row">
+<div class="col-md-3 col-sm-6">
+<div class="metric-card card text-center p-4">
+<i class="fas fa-database fa-3x text-primary mb-3"></i>
+<div class="metric-value text-primary">534,728</div>
+<div class="metric-label">Total Events</div>
+</div></div>
+<div class="col-md-3 col-sm-6">
+<div class="metric-card card text-center p-4">
+<i class='fas fa-exclamation-triangle fa-3x text-danger mb-3'></i>
+<div class='metric-value text-danger'>100%</div>
+<div class="metric-label">Error Rate</div>
+</div></div>
+<div class="col-md-3 col-sm-6">
+<div class="metric-card card text-center p-4">
+<i class="fas fa-cogs fa-3x text-info mb-3"></i>
+<div class="metric-value text-info">267,364</div>
+<div class="metric-label">Unique Processes</div>
+</div></div>
+<div class="col-md-3 col-sm-6">
+<div class="metric-card card text-center p-4">
+<i class="fas fa-clock fa-3x text-warning mb-3"></i>
+<div class="metric-value text-warning">73,150</div>
+<div class="metric-label">Events/Second</div>
+</div></div>
+</div></div>
+
+<div class="container mt-4">
+<div class="card">
+<div class="card-body text-center">
+<h2 class="section-title"><i class="fas fa-heartbeat me-2"></i>System Health Score</h2>
+<div class="row align-items-center">
+<div class="col-md-6">
+<canvas id="healthScoreGauge" width="300" height="150"></canvas>
+</div>
+<div class="col-md-6 text-start">
+<h3 class='text-danger'>33 / 100</h3>
+<p class="lead">Overall system health indicator based on error rates, anomalies, and risk factors.</p>
+<div class="progress" style="height: 30px;">
+<div class='progress-bar bg-danger' role='progressbar' style='width: 33%' aria-valuenow='33' aria-valuemin='0' aria-valuemax='100'>33%</div>
+</div>
+</div></div></div></div></div>
+
+<div class="container mt-4">
+<h2 class="section-title"><i class="fas fa-shield-alt me-2"></i>Risk Assessment</h2>
+<div class="card">
+<div class="card-body">
+<div class="row mb-4">
+<div class="col-md-12">
+<h4>Overall Risk Level: <span class='badge bg-danger fs-5'>Critical</span></h4>
+<p>Risk Score: <strong>90</strong> out of 100</p>
+</div></div>
+<div class="row">
+<div class="col-md-6 mb-3">
+<h6>Error Impact <small class='text-muted'>(Weight: 40%)</small></h6>
+<div class="progress" style="height: 25px;">
+<div class='progress-bar bg-danger' role='progressbar' style='width: 100%' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100'>100</div>
+</div></div>
+<div class="col-md-6 mb-3">
+<h6>Frequency <small class='text-muted'>(Weight: 30%)</small></h6>
+<div class="progress" style="height: 25px;">
+<div class='progress-bar bg-danger' role='progressbar' style='width: 100%' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100'>100</div>
+</div></div>
+<div class="col-md-6 mb-3">
+<h6>System Impact <small class='text-muted'>(Weight: 20%)</small></h6>
+<div class="progress" style="height: 25px;">
+<div class='progress-bar bg-danger' role='progressbar' style='width: 100%' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100'>100</div>
+</div></div>
+<div class="col-md-6 mb-3">
+<h6>Security <small class='text-muted'>(Weight: 10%)</small></h6>
+<div class="progress" style="height: 25px;">
+<div class='progress-bar bg-success' role='progressbar' style='width: 0%' aria-valuenow='0' aria-valuemin='0' aria-valuemax='100'>0</div>
+</div></div>
+</div></div></div></div>
+
+<div class="container mt-4">
+<h2 class="section-title"><i class="fas fa-brain me-2"></i>Pattern Analysis</h2>
+<div class="card">
+<div class="card-body">
+<h5>Process Clustering Analysis</h5>
+<div class="process-cluster-card">
+<h6><i class='fas fa-layer-group me-2'></i>High Activity</h6>
+<p><strong>Processes:</strong> 0</p>
+<p><strong>Category:</strong> System Critical</p>
+<p><small></small></p>
+</div>
+<div class="process-cluster-card">
+<h6><i class='fas fa-layer-group me-2'></i>Medium Activity</h6>
+<p><strong>Processes:</strong> 267364</p>
+<p><strong>Category:</strong> Standard Operations</p>
+</div>
+<div class="process-cluster-card">
+<h6><i class='fas fa-layer-group me-2'></i>Low Activity</h6>
+<p><strong>Processes:</strong> 0</p>
+<p><strong>Category:</strong> Background Tasks</p>
+<p><small></small></p>
+</div>
+</div></div>
+</div>
+
+<div class="container mt-4 lazy-load" data-lazy="charts">
+<h2 class="section-title"><i class="fas fa-chart-bar me-2"></i>Visual Analytics</h2>
+<div class="row">
+<div class="col-md-6">
+<div class="card">
+<div class="card-body">
+<h5>Top Processes by Activity</h5>
+<div class="chart-container">
+<canvas id="topProcessesChart"></canvas>
+</div></div></div></div>
+<div class="col-md-6">
+<div class="card">
+<div class="card-body">
+<h5>Top Operations</h5>
+<div class="chart-container">
+<canvas id="topOperationsChart"></canvas>
+</div></div></div></div>
+</div>
+<div class="row mt-3">
+<div class="col-md-12">
+<div class="card">
+<div class="card-body">
+<h5>Error Distribution</h5>
+<div class="chart-container">
+<canvas id="errorDistributionChart"></canvas>
+</div></div></div></div>
+</div>
+</div>
+
+<div class="container mt-4 lazy-load" data-lazy="tables">
+<h2 class="section-title"><i class="fas fa-table me-2"></i>Detailed Analysis</h2>
+<div class="card mb-3">
+<div class="card-body">
+<h5>Top Processes</h5>
+<table class="table data-table table-striped">
+<thead><tr><th>Process Name</th><th>Event Count</th></tr></thead><tbody>
+<tr><td>11:18:38.2570035 AM</td><td>2</td></tr>
+<tr><td>11:18:38.1592504 AM</td><td>2</td></tr>
+<tr><td>11:18:34.4601913 AM</td><td>2</td></tr>
+<tr><td>11:18:34.4339790 AM</td><td>2</td></tr>
+<tr><td>11:18:35.0077135 AM</td><td>2</td></tr>
+<tr><td>11:18:38.0492506 AM</td><td>2</td></tr>
+<tr><td>11:18:37.0126411 AM</td><td>2</td></tr>
+<tr><td>11:18:37.4822682 AM</td><td>2</td></tr>
+<tr><td>11:18:37.6315143 AM</td><td>2</td></tr>
+<tr><td>11:18:34.2333775 AM</td><td>2</td></tr>
+</tbody></table></div></div>
+<div class="card">
+<div class="card-body">
+<h5>Top Errors</h5>
+<table class="table data-table table-striped">
+<thead><tr><th>Error Type</th><th>Occurrences</th></tr></thead><tbody>
+<tr><td>4936</td><td>237,504</td></tr>
+<tr><td>11032</td><td>235,382</td></tr>
+<tr><td>3152</td><td>16,576</td></tr>
+<tr><td>4</td><td>9,974</td></tr>
+<tr><td>24228</td><td>7,806</td></tr>
+<tr><td>2380</td><td>6,280</td></tr>
+<tr><td>2820</td><td>4,706</td></tr>
+<tr><td>18792</td><td>3,818</td></tr>
+<tr><td>4060</td><td>3,660</td></tr>
+<tr><td>5304</td><td>1,994</td></tr>
+</tbody></table></div></div>
+</div>
+
+<div class="container mt-4">
+<h2 class="section-title"><i class="fas fa-lightbulb me-2"></i>AI-Powered Insights</h2>
+<div class="alert alert-info">No significant insights detected.</div>
+</div>
+
+<div class="container mt-4">
+<h2 class="section-title"><i class="fas fa-tasks me-2"></i>Recommendations</h2>
+<ol class="list-group list-group-numbered">
+<li class="list-group-item recommendation-card">
+<i class='fas fa-arrow-right me-2'></i>Investigate top error types and implement error handling
+</li>
+<li class="list-group-item recommendation-card">
+<i class='fas fa-arrow-right me-2'></i>Review application logs for root cause analysis
+</li>
+<li class="list-group-item recommendation-card">
+<i class='fas fa-arrow-right me-2'></i>Consolidate error handling for common error types
+</li>
+<li class="list-group-item recommendation-card">
+<i class='fas fa-arrow-right me-2'></i>Immediate attention required: Critical risk level detected
+</li>
+</ol>
+</div>
+
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+        // Initialize DataTables
+        $(document).ready(function() {
+            $('table.data-table').DataTable({
+                pageLength: 25,
+                order: [[1, 'desc']],
+                responsive: true,
+                dom: 'Bfrtip',
+                language: {
+                    search: "Filter:",
+                    searchPlaceholder: "Search all columns..."
+                }
+            });
+        });
+
+        // Export to Excel function
+        function exportToExcel() {
+            const wb = XLSX.utils.book_new();
+
+            // Export each table
+            document.querySelectorAll('table.data-table').forEach((table, index) => {
+                const ws = XLSX.utils.table_to_sheet(table);
+                XLSX.utils.book_append_sheet(wb, ws, `Sheet${index + 1}`);
+            });
+
+            XLSX.writeFile(wb, 'ProcmonAnalysis_' + new Date().toISOString().slice(0,10) + '.xlsx');
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+
+    <script>
+// Lazy loading for performance optimization
+const lazyLoadObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const element = entry.target;
+            const lazyType = element.dataset.lazy;
+
+            if (lazyType === 'charts') {
+                loadCharts();
+            } else if (lazyType === 'tables') {
+                loadTables();
+            }
+
+            lazyLoadObserver.unobserve(element);
+        }
+    });
+});
+
+// Observe lazy load elements
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.lazy-load').forEach(el => {
+        lazyLoadObserver.observe(el);
+    });
+});
+
+let chartsLoaded = false;
+let tablesLoaded = false;
+
+function loadCharts() {
+    if (chartsLoaded) return;
+    chartsLoaded = true;
+    new Chart(document.getElementById('topProcessesChart'), {
+        type: 'bar',
+        data: {
+            labels: ['11:18:38.2570035 AM','11:18:38.1592504 AM','11:18:34.4601913 AM','11:18:34.4339790 AM','11:18:35.0077135 AM','11:18:38.0492506 AM','11:18:37.0126411 AM','11:18:37.4822682 AM','11:18:37.6315143 AM','11:18:34.2333775 AM'],
+            datasets: [{
+                label: 'Event Count',
+                data: [2,2,2,2,2,2,2,2,2,2],
+                backgroundColor: 'rgba(13, 110, 253, 0.8)',
+                borderColor: 'rgba(13, 110, 253, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+    new Chart(document.getElementById('topOperationsChart'), {
+        type: 'horizontalBar',
+        data: {
+            labels: ['svchost.exe','wmiprvse.exe','System','TaniumCX.exe','lsass.exe','MonitoringHost.exe','vmms.exe','MsMpEng.exe','powershell.exe','newrelic-infra.exe'],
+            datasets: [{
+                label: 'Count',
+                data: [262996,235444,9974,8768,6280,3828,1994,1378,1192,1088],
+                backgroundColor: 'rgba(13, 202, 240, 0.8)',
+                borderColor: 'rgba(13, 202, 240, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true } }
+        }
+    });
+    new Chart(document.getElementById('errorDistributionChart'), {
+        type: 'pie',
+        data: {
+            labels: ['4936','11032','3152','4','24228','2380','2820','18792'],
+            datasets: [{
+                data: [237504,235382,16576,9974,7806,6280,4706,3818],
+                backgroundColor: [
+                    'rgba(220, 53, 69, 0.8)',
+                    'rgba(253, 126, 20, 0.8)',
+                    'rgba(255, 193, 7, 0.8)',
+                    'rgba(25, 135, 84, 0.8)',
+                    'rgba(13, 202, 240, 0.8)',
+                    'rgba(13, 110, 253, 0.8)',
+                    'rgba(111, 66, 193, 0.8)',
+                    'rgba(214, 51, 132, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'right' } }
+        }
+    });
+}
+
+function loadTables() {
+    if (tablesLoaded) return;
+    tablesLoaded = true;
+
+    // Initialize DataTables when tables section is visible
+    $('table.data-table').DataTable({
+        pageLength: 25,
+        order: [[1, 'desc']],
+        responsive: true,
+        language: {
+            search: "Filter:",
+            searchPlaceholder: "Search all columns..."
+        }
+    });
+}
+</script>
+
+</body>
+</html>

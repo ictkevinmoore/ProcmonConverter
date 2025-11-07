@@ -1,0 +1,11 @@
+"Time of Day","Process Name","PID","Operation","Path","Result","Detail","Duration"
+"12:00:01.1234567 PM","System","4","RegQueryKey","HKLM\Software\Microsoft","SUCCESS","Length: 256",0.0000123
+"12:00:02.2345678 PM","explorer.exe","1234","CreateFile","C:\Windows\explorer.exe","SUCCESS","Desired Access: Read",0.0001234
+"12:00:03.3456789 PM","chrome.exe","5678","ReadFile","C:\Users\test\file.txt","ACCESS DENIED","",0.0000567
+"12:00:04.4567890 PM","powershell.exe","9012","WriteFile","C:\Temp\output.log","SUCCESS","Bytes: 1024",0.0002345
+"12:00:05.5678901 PM","System","4","RegSetValue","HKLM\System\Config","SUCCESS","Type: REG_DWORD",0.0000089
+"12:00:06.6789012 PM","svchost.exe","3456","CreateFile","C:\Windows\System32\file.dll","NAME NOT FOUND","",0.0000456
+"12:00:07.7890123 PM","explorer.exe","1234","QueryDirectory","C:\Users\test\*","SUCCESS","Filter: *.*",0.0001123
+"12:00:08.8901234 PM","chrome.exe","5678","RegQueryKey","HKCU\Software\Google","SUCCESS","Length: 128",0.0000234
+"12:00:09.9012345 PM","System","4","CreateFile","C:\pagefile.sys","SHARING VIOLATION","",0.0000678
+"12:00:10.0123456 PM","powershell.exe","9012","RegQueryValue","HKLM\Software\Test","SUCCESS","Type: REG_SZ",0.0000345

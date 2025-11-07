@@ -1,0 +1,298 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ðŸš€ Enhanced Ultimate Procmon Analysis Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@latest/index.min.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50; --secondary: #34495e; --success: #27ae60; --warning: #f39c12;
+            --danger: #e74c3c; --info: #3498db; --light: #ecf0f1; --dark: #2c2c2c;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --shadow-soft: 0 10px 30px rgba(0,0,0,0.1); --shadow-card: 0 4px 15px rgba(0,0,0,0.1);
+            --border-radius: 12px; --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--gradient-primary); min-height: 100vh; padding: 20px;
+            line-height: 1.6; color: var(--primary);
+        }
+
+        .dashboard-container {
+            max-width: 1900px; margin: 0 auto; background: white; border-radius: 20px;
+            box-shadow: var(--shadow-soft); overflow: hidden; animation: slideInUp 0.6s ease-out;
+        }
+
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header {
+            background: var(--gradient-secondary); color: white; padding: 60px 40px; text-align: center;
+            position: relative; overflow: hidden;
+        }
+
+        .header::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.1); opacity: 0.1; } }
+
+        .header h1 { font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 300; margin-bottom: 10px; position: relative; z-index: 1; }
+        .header p { font-size: 1.1rem; opacity: 0.9; position: relative; z-index: 1; }
+
+        .theme-toggle {
+            position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); border: none;
+            border-radius: 50px; padding: 10px 20px; color: white; cursor: pointer; transition: var(--transition); z-index: 10;
+        }
+        .theme-toggle:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
+
+        .content { padding: 40px; }
+
+        .nav-tabs {
+            display: flex; margin-bottom: 30px; border-bottom: 2px solid var(--light); overflow-x: auto; gap: 0;
+        }
+
+        .nav-tab {
+            padding: 15px 25px; background: none; border: none; color: var(--secondary);
+            cursor: pointer; transition: var(--transition); font-weight: 500; white-space: nowrap; position: relative;
+        }
+
+        .nav-tab.active { color: var(--info); }
+        .nav-tab.active::after {
+            content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: var(--info);
+        }
+        .nav-tab:hover { color: var(--info); background: rgba(52, 152, 219, 0.05); }
+
+        .tab-content { display: none; animation: fadeIn 0.4s ease-in; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .metrics-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); padding: 30px; border-radius: var(--border-radius);
+            text-align: center; box-shadow: var(--shadow-card); transition: var(--transition); position: relative; overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); transition: left 0.6s;
+        }
+        .metric-card:hover::before { left: 100%; }
+        .metric-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
+
+        .metric-number {
+            font-size: clamp(2rem, 3vw, 2.8rem); font-weight: bold; color: var(--primary); margin-bottom: 10px; position: relative;
+        }
+
+        .metric-label {
+            color: #666; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem;
+        }
+
+        .section {
+            margin: 40px 0; padding: 30px; background: white; border-radius: var(--border-radius);
+            border-left: 5px solid var(--info); box-shadow: var(--shadow-card); transition: var(--transition);
+        }
+        .section:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+        .section h2 { color: var(--primary); margin-bottom: 20px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
+
+        .chart-container { position: relative; height: 400px; margin: 20px 0; }
+        .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; margin: 20px 0; }
+
+        table {
+            width: 100%; border-collapse: collapse; background: white; border-radius: var(--border-radius);
+            overflow: hidden; box-shadow: var(--shadow-card); margin: 20px 0;
+        }
+
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th {
+            background: var(--primary); color: white; font-weight: 600; text-transform: uppercase;
+            font-size: 0.85rem; letter-spacing: 1px; position: sticky; top: 0; z-index: 1;
+        }
+        tr:hover { background: #f8f9fa; transform: scale(1.01); transition: var(--transition); }
+
+        .badge {
+            display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem;
+            font-weight: bold; color: white; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .badge-ultimate { background: linear-gradient(45deg, #6f42c1, #8e44ad); }
+        .badge-high { background: linear-gradient(45deg, var(--danger), #c0392b); }
+        .badge-medium { background: linear-gradient(45deg, var(--warning), #d68910); }
+        .badge-low { background: linear-gradient(45deg, var(--success), #229954); }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; } .header { padding: 40px 20px; } .content { padding: 20px; }
+            .metrics-grid { grid-template-columns: 1fr; gap: 15px; } .chart-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <button class="theme-toggle" onclick="toggleTheme()">ðŸŒ™ Dark Mode</button>
+            <h1>ðŸš€ Enhanced Ultimate Procmon Analysis Dashboard</h1>
+            <p>Generated: 2025-07-30 23:22:09 | Version 5.0-Ultimate-Enhanced</p>
+        </div>
+
+        <div class="content">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showTab('overview')">ðŸ“Š Overview</button>
+                <button class="nav-tab" onclick="showTab('processes')">ðŸ” Processes</button>
+                <button class="nav-tab" onclick="showTab('security')">ðŸ”’ Security</button>
+                <button class="nav-tab" onclick="showTab('performance')">âš¡ Performance</button>
+                <button class="nav-tab" onclick="showTab('analytics')">ðŸ“ˆ Analytics</button>
+            </div>
+
+            <div id="overview" class="tab-content active">
+                <div class="metrics-grid">
+                    <div class="metric-card"><div class="metric-number">550488</div><div class="metric-label">Total Records</div></div>
+                    <div class="metric-card"><div class="metric-number">0</div><div class="metric-label">Network Events</div></div>
+                    <div class="metric-card"><div class="metric-number">0</div><div class="metric-label">File System Events</div></div>
+                    <div class="metric-card"><div class="metric-number">0</div><div class="metric-label">Registry Events</div></div>
+                    <div class="metric-card"><div class="metric-number">0</div><div class="metric-label">Process Events</div></div>
+                    <div class="metric-card"><div class="metric-number">0</div><div class="metric-label">Error Events</div></div>
+                    <div class="metric-card"><div class="metric-number">100%</div><div class="metric-label">System Health</div></div>
+                    <div class="metric-card"><div class="metric-number">223</div><div class="metric-label">Records/Second</div></div>
+                </div>
+
+                <div class="chart-grid">
+                    <div class="section">
+                        <h2>ðŸ“Š Event Distribution</h2>
+                        <div class="chart-container"><canvas id="eventChart"></canvas></div>
+                    </div>
+                    <div class="section">
+                        <h2>ðŸ”’ Security Analysis</h2>
+                        <div class="chart-container"><canvas id="securityChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="processes" class="tab-content">
+                <div class="section">
+                    <h2>ðŸ” Top Active Processes</h2>
+                    <table>
+                        <thead><tr><th>Process Name</th><th>Event Count</th><th>Activity Level</th><th>Security Level</th></tr></thead>
+                        <tbody>                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="security" class="tab-content">
+                <div class="section">
+                    <h2>ðŸ”’ Security Analysis Summary</h2>
+                    <div class="metrics-grid">
+                        <div class="metric-card"><div class="metric-number">100%</div><div class="metric-label">Security Score</div></div>
+                        <div class="metric-card"><div class="metric-number">0</div><div class="metric-label">Security Violations</div></div>
+                        <div class="metric-card"><div class="metric-number">0</div><div class="metric-label">Unique IP Addresses</div></div>
+                        <div class="metric-card"><div class="metric-number">0</div><div class="metric-label">Network Ports</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="performance" class="tab-content">
+                <div class="section">
+                    <h2>âš¡ Ultimate Performance Metrics</h2>
+                    <table>
+                        <thead><tr><th>Metric</th><th>Value</th><th>Performance Grade</th></tr></thead>
+                        <tbody>
+                            <tr><td>Processing Time</td><td>2468.8 seconds</td><td><span class="badge badge-ultimate">Ultimate</span></td></tr>
+                            <tr><td>Processing Rate</td><td>223 records/sec</td><td><span class="badge badge-high">Excellent</span></td></tr>
+                            <tr><td>Memory Usage</td><td>919.75 MB (Peak: 919.75 MB)</td><td><span class="badge badge-medium">Optimized</span></td></tr>
+                            <tr><td>GC Collections</td><td>0</td><td><span class="badge badge-low">Efficient</span></td></tr>
+                            <tr><td>Collection Operations</td><td>1100974</td><td><span class="badge badge-ultimate">Type-Safe</span></td></tr>
+                            <tr><td>Type Conversion Errors</td><td>0</td><td><span class="badge badge-low">Zero Errors</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="analytics" class="tab-content">
+                <div class="section">
+                    <h2>ðŸ“ˆ Advanced Analytics</h2>
+                    <div class="chart-container"><canvas id="analyticsChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            const button = document.querySelector('.theme-toggle');
+            button.textContent = document.body.classList.contains('dark-theme') ? 'â˜€ï¸ Light Mode' : 'ðŸŒ™ Dark Mode';
+        }
+
+        // Initialize Charts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Event Distribution Chart
+            const eventCtx = document.getElementById('eventChart');
+            if (eventCtx) {
+                new Chart(eventCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Network', 'File System', 'Registry', 'Process', 'Other'],
+                        datasets: [{
+                            data: [0, 0, 0, 0, (550488 - 0 - 0 - 0 - 0)],
+                            backgroundColor: ['#3498db', '#e74c3c', '#f39c12', '#27ae60', '#9b59b6']
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            // Security Chart
+            const securityCtx = document.getElementById('securityChart');
+            if (securityCtx) {
+                new Chart(securityCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Security Score', 'Error Events', 'Network Events'],
+                        datasets: [{
+                            label: 'Security Metrics',
+                            data: [100, 0, 0],
+                            backgroundColor: ['#27ae60', '#e74c3c', '#3498db']
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            // Analytics Chart
+            const analyticsCtx = document.getElementById('analyticsChart');
+            if (analyticsCtx) {
+                new Chart(analyticsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Processes', 'IPs', 'Paths', 'Devices', 'Ports'],
+                        datasets: [{
+                            label: 'Unique Entities',
+                            data: [0, 0, 0, 0, 0],
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            fill: true
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

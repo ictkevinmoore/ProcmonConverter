@@ -1,0 +1,21 @@
+﻿BACKUP MANIFEST
+Created: 2025-11-05 21:45:31
+Backup Name: ProcmonConverter-Production-Ready-20251105-214531
+
+FILES:
+  C:\Users\ictke\OneDrive\Desktop\November Script Back-up\ProcmonConverter-Production-Ready-20251105-214531\BACKUP-README.md (2131 bytes)
+  C:\Users\ictke\OneDrive\Desktop\November Script Back-up\ProcmonConverter-Production-Ready-20251105-214531\Generate-Professional-Report.ps1 (91614 bytes)
+  C:\Users\ictke\OneDrive\Desktop\November Script Back-up\ProcmonConverter-Production-Ready-20251105-214531\PRODUCTION-READY-10-10-REPORT.md (9267 bytes)
+  C:\Users\ictke\OneDrive\Desktop\November Script Back-up\ProcmonConverter-Production-Ready-20251105-214531\README.md (8184 bytes)
+  C:\Users\ictke\OneDrive\Desktop\November Script Back-up\ProcmonConverter-Production-Ready-20251105-214531\StreamingCSVProcessor.ps1 (20129 bytes)
+  C:\Users\ictke\OneDrive\Desktop\November Script Back-up\ProcmonConverter-Production-Ready-20251105-214531\Ultimate-Modular-ProcmonAnalysis-Suite-INTEGRATED.ps1 (16777 bytes)
+  C:\Users\ictke\OneDrive\Desktop\November Script Back-up\ProcmonConverter-Production-Ready-20251105-214531\Config\appsettings.HighPerformance.json (586 bytes)
+  C:\Users\ictke\OneDrive\Desktop\November Script Back-up\ProcmonConverter-Production-Ready-20251105-214531\Config\appsettings.json (1048 bytes)
+  C:\Users\ictke\OneDrive\Desktop\November Script Back-up\ProcmonConverter-Production-Ready-20251105-214531\Config\ConfigLoader.psm1 (13196 bytes)
+  C:\Users\ictke\OneDrive\Desktop\November Script Back-up\ProcmonConverter-Production-Ready-20251105-214531\Config\ProcmonAnalysis.Config.psd1 (5451 bytes)
+  C:\Users\ictke\OneDrive\Desktop\November Script Back-up\ProcmonConverter-Production-Ready-20251105-214531\Config\ProcmonAnalysis.Patterns.psd1 (9122 bytes)
+  C:\Users\ictke\OneDrive\Desktop\November Script Back-up\ProcmonConverter-Production-Ready-20251105-214531\Config\ProcmonAnalysis.Profiles.psd1 (7736 bytes)
+  C:\Users\ictke\OneDrive\Desktop\November Script Back-up\ProcmonConverter-Production-Ready-20251105-214531\Config\ProcmonAnalysisConfig.psd1 (3390 bytes)
+  C:\Users\ictke\OneDrive\Desktop\November Script Back-up\ProcmonConverter-Production-Ready-20251105-214531\Config\ProcmonSuite.config.json (2282 bytes)
+  C:\Users\ictke\OneDrive\Desktop\November Script Back-up\ProcmonConverter-Production-Ready-20251105-214531\Config\StructuredLogger.psm1 (14881 bytes)
+  C:\Users\ictke\OneDrive\Desktop\November Script Back-up\ProcmonConverter-Production-Ready-20251105-214531\Data\SampleData\test-sample-data.csv (1207 bytes)

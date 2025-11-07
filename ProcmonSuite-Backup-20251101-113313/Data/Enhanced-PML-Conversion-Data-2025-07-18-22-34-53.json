@@ -1,0 +1,127 @@
+﻿{
+    "Summary":  {
+                    "MemoryPeakMB":  95.93,
+                    "FailedConversions":  4,
+                    "SuccessRate":  55.6,
+                    "TotalFiles":  9,
+                    "TotalCsvSizeMB":  1062.11,
+                    "TotalRecords":  0,
+                    "SuccessfulConversions":  5,
+                    "ValidationFailures":  0,
+                    "TotalPmlSizeMB":  2928,
+                    "SkippedFiles":  0,
+                    "RetryCount":  8,
+                    "GeneratedAt":  "2025-07-18 22:36:20",
+                    "ProcessingTimeSeconds":  87.2
+                },
+    "ProcessingStrategies":  {
+                                 "Enhanced":  2,
+                                 "Standard":  4,
+                                 "Large":  3
+                             },
+    "Files":  [
+                  {
+                      "PmlFile":  "capture-2025-07-18-00-00-48.pml",
+                      "PmlSizeMB":  172.7,
+                      "CsvFile":  "capture-2025-07-18-00-00-48.csv",
+                      "CsvSizeMB":  62.34,
+                      "RecordCount":  0,
+                      "DurationSeconds":  2.1,
+                      "Strategy":  "Enhanced",
+                      "Success":  true,
+                      "ErrorMessage":  ""
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-00-00-48-chunk-001-of-004.pml",
+                      "PmlSizeMB":  49,
+                      "CsvFile":  "capture-2025-07-18-00-00-48-chunk-001-of-004.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  15.7,
+                      "Strategy":  "Standard",
+                      "Success":  false,
+                      "ErrorMessage":  "Process Monitor returned exit code 1"
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-00-00-48-chunk-002-of-004.pml",
+                      "PmlSizeMB":  49,
+                      "CsvFile":  "capture-2025-07-18-00-00-48-chunk-002-of-004.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  12.2,
+                      "Strategy":  "Standard",
+                      "Success":  false,
+                      "ErrorMessage":  "Process Monitor returned exit code 1"
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-00-00-48-chunk-003-of-004.pml",
+                      "PmlSizeMB":  49,
+                      "CsvFile":  "capture-2025-07-18-00-00-48-chunk-003-of-004.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  11.1,
+                      "Strategy":  "Standard",
+                      "Success":  false,
+                      "ErrorMessage":  "Process Monitor returned exit code 1"
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-00-00-48-chunk-004-of-004.pml",
+                      "PmlSizeMB":  22.7,
+                      "CsvFile":  "capture-2025-07-18-00-00-48-chunk-004-of-004.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  11.1,
+                      "Strategy":  "Standard",
+                      "Success":  false,
+                      "ErrorMessage":  "Process Monitor returned exit code 1"
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-01-16-38.pml",
+                      "PmlSizeMB":  932.71,
+                      "CsvFile":  "capture-2025-07-18-01-16-38.csv",
+                      "CsvSizeMB":  405.41,
+                      "RecordCount":  0,
+                      "DurationSeconds":  15.8,
+                      "Strategy":  "Large",
+                      "Success":  true,
+                      "ErrorMessage":  ""
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-02-31-12.pml",
+                      "PmlSizeMB":  594.23,
+                      "CsvFile":  "capture-2025-07-18-02-31-12.csv",
+                      "CsvSizeMB":  214.2,
+                      "RecordCount":  0,
+                      "DurationSeconds":  6.6,
+                      "Strategy":  "Large",
+                      "Success":  true,
+                      "ErrorMessage":  ""
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-04-03-36.pml",
+                      "PmlSizeMB":  674.66,
+                      "CsvFile":  "capture-2025-07-18-04-03-36.csv",
+                      "CsvSizeMB":  252.92,
+                      "RecordCount":  0,
+                      "DurationSeconds":  8.1,
+                      "Strategy":  "Large",
+                      "Success":  true,
+                      "ErrorMessage":  ""
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-04-06-39.pml",
+                      "PmlSizeMB":  384,
+                      "CsvFile":  "capture-2025-07-18-04-06-39.csv",
+                      "CsvSizeMB":  127.24,
+                      "RecordCount":  0,
+                      "DurationSeconds":  4.1,
+                      "Strategy":  "Enhanced",
+                      "Success":  true,
+                      "ErrorMessage":  ""
+                  }
+              ],
+    "ErrorTypes":  {
+                       "Process Error":  12,
+                       "General":  4
+                   }
+}

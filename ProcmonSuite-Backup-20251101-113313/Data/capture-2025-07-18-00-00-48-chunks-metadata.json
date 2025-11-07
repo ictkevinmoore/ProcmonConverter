@@ -1,0 +1,58 @@
+﻿{
+    "FileType":  "Auto",
+    "CreatedAt":  {
+                      "value":  "\/Date(1752827575603)\/",
+                      "DisplayHint":  2,
+                      "DateTime":  "Friday, July 18, 2025 3:32:55 AM"
+                  },
+    "ChunkSize":  52428800,
+    "TotalChunks":  4,
+    "OriginalFile":  "C:\\Users\\ictke\\Desktop\\ProcmonConverter\\capture-2025-07-18-00-00-48.pml",
+    "PreserveMetadata":  true,
+    "Chunks":  [
+                   {
+                       "OriginalFile":  "C:\\Users\\ictke\\Desktop\\ProcmonConverter\\capture-2025-07-18-00-00-48.pml",
+                       "FilePath":  "C:\\Users\\ictke\\Desktop\\ProcmonConverter\\capture-2025-07-18-00-00-48-chunk-001-of-004.pml",
+                       "CreatedAt":  {
+                                         "value":  "\/Date(1752827575499)\/",
+                                         "DisplayHint":  2,
+                                         "DateTime":  "Friday, July 18, 2025 3:32:55 AM"
+                                     },
+                       "Size":  51381248,
+                       "ChunkNumber":  1
+                   },
+                   {
+                       "OriginalFile":  "C:\\Users\\ictke\\Desktop\\ProcmonConverter\\capture-2025-07-18-00-00-48.pml",
+                       "FilePath":  "C:\\Users\\ictke\\Desktop\\ProcmonConverter\\capture-2025-07-18-00-00-48-chunk-002-of-004.pml",
+                       "CreatedAt":  {
+                                         "value":  "\/Date(1752827575528)\/",
+                                         "DisplayHint":  2,
+                                         "DateTime":  "Friday, July 18, 2025 3:32:55 AM"
+                                     },
+                       "Size":  51381248,
+                       "ChunkNumber":  2
+                   },
+                   {
+                       "OriginalFile":  "C:\\Users\\ictke\\Desktop\\ProcmonConverter\\capture-2025-07-18-00-00-48.pml",
+                       "FilePath":  "C:\\Users\\ictke\\Desktop\\ProcmonConverter\\capture-2025-07-18-00-00-48-chunk-003-of-004.pml",
+                       "CreatedAt":  {
+                                         "value":  "\/Date(1752827575551)\/",
+                                         "DisplayHint":  2,
+                                         "DateTime":  "Friday, July 18, 2025 3:32:55 AM"
+                                     },
+                       "Size":  51381248,
+                       "ChunkNumber":  3
+                   },
+                   {
+                       "OriginalFile":  "C:\\Users\\ictke\\Desktop\\ProcmonConverter\\capture-2025-07-18-00-00-48.pml",
+                       "FilePath":  "C:\\Users\\ictke\\Desktop\\ProcmonConverter\\capture-2025-07-18-00-00-48-chunk-004-of-004.pml",
+                       "CreatedAt":  {
+                                         "value":  "\/Date(1752827575581)\/",
+                                         "DisplayHint":  2,
+                                         "DateTime":  "Friday, July 18, 2025 3:32:55 AM"
+                                     },
+                       "Size":  23805035,
+                       "ChunkNumber":  4
+                   }
+               ]
+}

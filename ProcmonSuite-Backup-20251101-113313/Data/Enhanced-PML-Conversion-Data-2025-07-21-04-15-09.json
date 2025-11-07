@@ -1,0 +1,147 @@
+﻿{
+    "Summary":  {
+                    "MemoryPeakMB":  98.3,
+                    "FailedConversions":  6,
+                    "SuccessRate":  45.5,
+                    "TotalFiles":  11,
+                    "TotalCsvSizeMB":  4097.18,
+                    "TotalRecords":  0,
+                    "SuccessfulConversions":  5,
+                    "ValidationFailures":  0,
+                    "TotalPmlSizeMB":  33849.01,
+                    "SkippedFiles":  0,
+                    "RetryCount":  12,
+                    "GeneratedAt":  "2025-07-21 04:19:32",
+                    "ProcessingTimeSeconds":  262.6
+                },
+    "ProcessingStrategies":  {
+                                 "Large":  11
+                             },
+    "Files":  [
+                  {
+                      "PmlFile":  "VSHSEA02D_250707-095128_Procmon_385200.pml",
+                      "PmlSizeMB":  3200,
+                      "CsvFile":  "VSHSEA02D_250707-095128_Procmon_385200.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  21.4,
+                      "Strategy":  "Large",
+                      "Success":  false,
+                      "ErrorMessage":  "Process Monitor returned exit code 1"
+                  },
+                  {
+                      "PmlFile":  "VSHSEA02E_250707-095212_Procmon_385200.pml",
+                      "PmlSizeMB":  3200,
+                      "CsvFile":  "VSHSEA02E_250707-095212_Procmon_385200.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  16.2,
+                      "Strategy":  "Large",
+                      "Success":  false,
+                      "ErrorMessage":  "Process Monitor returned exit code 1"
+                  },
+                  {
+                      "PmlFile":  "VSHSEA02F_250707-090337_Procmon_385200.pml",
+                      "PmlSizeMB":  2870.18,
+                      "CsvFile":  "VSHSEA02F_250707-090337_Procmon_385200.csv",
+                      "CsvSizeMB":  777.23,
+                      "RecordCount":  0,
+                      "DurationSeconds":  32.1,
+                      "Strategy":  "Large",
+                      "Success":  true,
+                      "ErrorMessage":  ""
+                  },
+                  {
+                      "PmlFile":  "VSHSEA02F_250707-095230_Procmon_385200.pml",
+                      "PmlSizeMB":  3200,
+                      "CsvFile":  "VSHSEA02F_250707-095230_Procmon_385200.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  16.2,
+                      "Strategy":  "Large",
+                      "Success":  false,
+                      "ErrorMessage":  "Process Monitor returned exit code 1"
+                  },
+                  {
+                      "PmlFile":  "VSHSEA02G_250707-090539_Procmon_385200.pml",
+                      "PmlSizeMB":  2861.08,
+                      "CsvFile":  "VSHSEA02G_250707-090539_Procmon_385200.csv",
+                      "CsvSizeMB":  713.55,
+                      "RecordCount":  0,
+                      "DurationSeconds":  29,
+                      "Strategy":  "Large",
+                      "Success":  true,
+                      "ErrorMessage":  ""
+                  },
+                  {
+                      "PmlFile":  "VSHSEA02G_250707-095251_Procmon_385200.pml",
+                      "PmlSizeMB":  3200,
+                      "CsvFile":  "VSHSEA02G_250707-095251_Procmon_385200.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  16.7,
+                      "Strategy":  "Large",
+                      "Success":  false,
+                      "ErrorMessage":  "Process Monitor returned exit code 1"
+                  },
+                  {
+                      "PmlFile":  "VSHSEA02H_250707-090655_Procmon_385200.pml",
+                      "PmlSizeMB":  2866.36,
+                      "CsvFile":  "VSHSEA02H_250707-090655_Procmon_385200.csv",
+                      "CsvSizeMB":  709.92,
+                      "RecordCount":  0,
+                      "DurationSeconds":  28.5,
+                      "Strategy":  "Large",
+                      "Success":  true,
+                      "ErrorMessage":  ""
+                  },
+                  {
+                      "PmlFile":  "VSHSEA02H_250707-095318_Procmon_385200.pml",
+                      "PmlSizeMB":  3200,
+                      "CsvFile":  "VSHSEA02H_250707-095318_Procmon_385200.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  12.7,
+                      "Strategy":  "Large",
+                      "Success":  false,
+                      "ErrorMessage":  "Process Monitor returned exit code 1"
+                  },
+                  {
+                      "PmlFile":  "VSHSEA02I_250707-090801_Procmon_385200.pml",
+                      "PmlSizeMB":  3036.19,
+                      "CsvFile":  "VSHSEA02I_250707-090801_Procmon_385200.csv",
+                      "CsvSizeMB":  956.07,
+                      "RecordCount":  0,
+                      "DurationSeconds":  37.1,
+                      "Strategy":  "Large",
+                      "Success":  true,
+                      "ErrorMessage":  ""
+                  },
+                  {
+                      "PmlFile":  "VSHSEA02I_250707-095336_Procmon_385200.pml",
+                      "PmlSizeMB":  3015.2,
+                      "CsvFile":  "VSHSEA02I_250707-095336_Procmon_385200.csv",
+                      "CsvSizeMB":  940.41,
+                      "RecordCount":  0,
+                      "DurationSeconds":  36.7,
+                      "Strategy":  "Large",
+                      "Success":  true,
+                      "ErrorMessage":  ""
+                  },
+                  {
+                      "PmlFile":  "VSHSEA02I_250707-120711_Procmon_385200.pml",
+                      "PmlSizeMB":  3200,
+                      "CsvFile":  "VSHSEA02I_250707-120711_Procmon_385200.csv",
+                      "CsvSizeMB":  0,
+                      "RecordCount":  0,
+                      "DurationSeconds":  15.7,
+                      "Strategy":  "Large",
+                      "Success":  false,
+                      "ErrorMessage":  "Process Monitor returned exit code 1"
+                  }
+              ],
+    "ErrorTypes":  {
+                       "Process Error":  18,
+                       "General":  6
+                   }
+}

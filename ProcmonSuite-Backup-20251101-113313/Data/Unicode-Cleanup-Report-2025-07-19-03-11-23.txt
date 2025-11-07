@@ -1,0 +1,22 @@
+﻿Unicode Character Cleanup Report
+===============================
+Generated: 2025-07-19 03:11:23
+
+Summary:
+- Files Scanned: 672
+- Files Modified: 0
+- Total Replacements: 0
+- Mode: Report Only (no changes made)
+
+Modified Files:
+Recommendations:
+1. Use ASCII alternatives in source code:
+   - [OK] instead of check marks (âœ“)
+   - [X] instead of cross marks (âœ—)
+   - [WARNING] instead of warning symbols (âš )
+   - [CHART] instead of chart icons (ðŸ“Š)
+   - (C) instead of copyright symbols ((C))
+
+2. For HTML files:
+   - Add <meta charset="UTF-8"> to all HTML files
+   - Use HTML entities instead of direct Unicode

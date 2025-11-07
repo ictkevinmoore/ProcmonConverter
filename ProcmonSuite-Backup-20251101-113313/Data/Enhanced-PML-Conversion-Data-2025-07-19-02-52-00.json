@@ -1,0 +1,91 @@
+﻿{
+    "Summary":  {
+                    "MemoryPeakMB":  0,
+                    "FailedConversions":  0,
+                    "SuccessRate":  0,
+                    "TotalFiles":  6,
+                    "TotalCsvSizeMB":  1863.6,
+                    "TotalRecords":  0,
+                    "SuccessfulConversions":  0,
+                    "ValidationFailures":  0,
+                    "TotalPmlSizeMB":  5633.36,
+                    "SkippedFiles":  6,
+                    "RetryCount":  0,
+                    "GeneratedAt":  "2025-07-19 02:52:01",
+                    "ProcessingTimeSeconds":  0.3
+                },
+    "ProcessingStrategies":  {
+
+                             },
+    "Files":  [
+                  {
+                      "PmlFile":  "capture-2025-07-18-00-00-48.pml",
+                      "PmlSizeMB":  172.7,
+                      "CsvFile":  "capture-2025-07-18-00-00-48.csv",
+                      "CsvSizeMB":  62.34,
+                      "RecordCount":  -1,
+                      "DurationSeconds":  0,
+                      "Strategy":  "Skipped",
+                      "Success":  true,
+                      "ErrorMessage":  ""
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-01-16-38.pml",
+                      "PmlSizeMB":  932.71,
+                      "CsvFile":  "capture-2025-07-18-01-16-38.csv",
+                      "CsvSizeMB":  405.41,
+                      "RecordCount":  -1,
+                      "DurationSeconds":  0,
+                      "Strategy":  "Skipped",
+                      "Success":  true,
+                      "ErrorMessage":  ""
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-02-31-12.pml",
+                      "PmlSizeMB":  594.23,
+                      "CsvFile":  "capture-2025-07-18-02-31-12.csv",
+                      "CsvSizeMB":  214.2,
+                      "RecordCount":  -1,
+                      "DurationSeconds":  0,
+                      "Strategy":  "Skipped",
+                      "Success":  true,
+                      "ErrorMessage":  ""
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-04-03-36.pml",
+                      "PmlSizeMB":  674.66,
+                      "CsvFile":  "capture-2025-07-18-04-03-36.csv",
+                      "CsvSizeMB":  252.92,
+                      "RecordCount":  -1,
+                      "DurationSeconds":  0,
+                      "Strategy":  "Skipped",
+                      "Success":  true,
+                      "ErrorMessage":  ""
+                  },
+                  {
+                      "PmlFile":  "capture-2025-07-18-04-06-39.pml",
+                      "PmlSizeMB":  384,
+                      "CsvFile":  "capture-2025-07-18-04-06-39.csv",
+                      "CsvSizeMB":  127.24,
+                      "RecordCount":  -1,
+                      "DurationSeconds":  0,
+                      "Strategy":  "Skipped",
+                      "Success":  true,
+                      "ErrorMessage":  ""
+                  },
+                  {
+                      "PmlFile":  "VSHSEASQL01A_250707-091329_Procmon_385200.pml",
+                      "PmlSizeMB":  2875.06,
+                      "CsvFile":  "VSHSEASQL01A_250707-091329_Procmon_385200.csv",
+                      "CsvSizeMB":  801.49,
+                      "RecordCount":  -1,
+                      "DurationSeconds":  0,
+                      "Strategy":  "Skipped",
+                      "Success":  true,
+                      "ErrorMessage":  ""
+                  }
+              ],
+    "ErrorTypes":  {
+
+                   }
+}

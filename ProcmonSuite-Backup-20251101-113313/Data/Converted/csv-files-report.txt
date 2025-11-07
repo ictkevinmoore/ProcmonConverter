@@ -1,0 +1,39 @@
+﻿CSV FILE REPORT
+==============
+Folder: C:\Users\ictke\Desktop\ProcmonConverter\Converted
+Scan Time: 2025-07-19 05:58:00
+Include Subfolders: False
+Total Files: 17
+
+FILE DETAILS
+===========
+
+File Name                                                      Created             Modified            Size 
+                                                                                                        (MB)
+---------                                                      -------             --------            -----
+VSHSEASQL01B_250707-091632_Procmon_385200.csv                  2025-07-19 05:32:17 2025-07-19 05:32:49 ...07
+VSHSEASQL01B_250707-091632_Procmon_385200-chunk-001-of-016.csv 2025-07-19 05:43:16 2025-07-19 05:43:17    50
+VSHSEASQL01B_250707-091632_Procmon_385200-chunk-002-of-016.csv 2025-07-19 05:43:17 2025-07-19 05:43:18    50
+VSHSEASQL01B_250707-091632_Procmon_385200-chunk-003-of-016.csv 2025-07-19 05:43:18 2025-07-19 05:43:19    50
+VSHSEASQL01B_250707-091632_Procmon_385200-chunk-004-of-016.csv 2025-07-19 05:43:19 2025-07-19 05:43:20    50
+VSHSEASQL01B_250707-091632_Procmon_385200-chunk-005-of-016.csv 2025-07-19 05:43:20 2025-07-19 05:43:21    50
+VSHSEASQL01B_250707-091632_Procmon_385200-chunk-006-of-016.csv 2025-07-19 05:43:21 2025-07-19 05:43:22    50
+VSHSEASQL01B_250707-091632_Procmon_385200-chunk-007-of-016.csv 2025-07-19 05:43:22 2025-07-19 05:43:23    50
+VSHSEASQL01B_250707-091632_Procmon_385200-chunk-008-of-016.csv 2025-07-19 05:43:23 2025-07-19 05:43:25    50
+VSHSEASQL01B_250707-091632_Procmon_385200-chunk-009-of-016.csv 2025-07-19 05:43:25 2025-07-19 05:43:25    50
+VSHSEASQL01B_250707-091632_Procmon_385200-chunk-010-of-016.csv 2025-07-19 05:43:25 2025-07-19 05:43:27    50
+VSHSEASQL01B_250707-091632_Procmon_385200-chunk-011-of-016.csv 2025-07-19 05:43:27 2025-07-19 05:43:28    50
+VSHSEASQL01B_250707-091632_Procmon_385200-chunk-012-of-016.csv 2025-07-19 05:43:28 2025-07-19 05:43:28    50
+VSHSEASQL01B_250707-091632_Procmon_385200-chunk-013-of-016.csv 2025-07-19 05:43:28 2025-07-19 05:43:30    50
+VSHSEASQL01B_250707-091632_Procmon_385200-chunk-014-of-016.csv 2025-07-19 05:43:30 2025-07-19 05:43:31    50
+VSHSEASQL01B_250707-091632_Procmon_385200-chunk-015-of-016.csv 2025-07-19 05:43:31 2025-07-19 05:43:31    50
+VSHSEASQL01B_250707-091632_Procmon_385200-chunk-016-of-016.csv 2025-07-19 05:43:31 2025-07-19 05:43:32 13.08
+
+
+
+SUMMARY
+=======
+Total Size: 1526.15 MB
+Oldest File: VSHSEASQL01B_250707-091632_Procmon_385200.csv (Created: 2025-07-19 05:32:17)
+Newest File: VSHSEASQL01B_250707-091632_Procmon_385200-chunk-016-of-016.csv (Created: 2025-07-19 05:43:31)
+
