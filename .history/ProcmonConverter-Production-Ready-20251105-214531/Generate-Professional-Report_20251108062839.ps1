@@ -1043,7 +1043,7 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('                            <h5 class="mt-4">Key Insights</h5>') | Out-Null
         $htmlBuilder.AppendLine('                            <ul class="list-group">') | Out-Null
         foreach ($insight in $analytics.Insights) {
-            $htmlBuilder.AppendFormat('                                <li class="list-group-item insight-clickable" data-insight-type="executive" data-insight-id="{0}"><i class="fas fa-lightbulb insight-icon"></i><span class="insight-text">{1}</span><i class="fas fa-chevron-right insight-arrow"></i></li>', [System.Web.HttpUtility]::HtmlEncode($insight).GetHashCode(), [System.Web.HttpUtility]::HtmlEncode($insight)) | Out-Null
+            $htmlBuilder.AppendFormat('                                <li class="list-group-item">{0}</li>', [System.Web.HttpUtility]::HtmlEncode($insight)) | Out-Null
         }
         $htmlBuilder.AppendLine('                            </ul>') | Out-Null
         $htmlBuilder.AppendLine('                            <h5 class="mt-4">Recommendations</h5>') | Out-Null

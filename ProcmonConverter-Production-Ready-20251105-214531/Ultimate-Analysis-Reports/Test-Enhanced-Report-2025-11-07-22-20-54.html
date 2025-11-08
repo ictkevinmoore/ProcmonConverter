@@ -1,0 +1,897 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procmon Professional Analysis Report - TEST-ENHANCED-20251107-222054</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables with Bootstrap 5 -->
+    <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/searchpanes/2.2.0/css/searchPanes.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/select/1.7.0/css/select.bootstrap5.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Gates Foundation Theme Variables */
+        :root[data-theme="light"] {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e8e9eb;
+            --text-primary: #2c3e50;
+            --text-secondary: #64748b;
+            --border-color: #cbd5e1;
+            --card-bg: #ffffff;
+            --modal-bg: #ffffff;
+            --modal-overlay: rgba(0, 0, 0, 0.5);
+            --primary-gradient: linear-gradient(135deg, #475569 0%, #334155 100%);
+            --primary-solid: #475569;
+            --primary-hover: #334155;
+            --accent-orange: #d97706;
+            --accent-orange-hover: #b45309;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        :root[data-theme="dark"] {
+            --bg-primary: #1e293b;
+            --bg-secondary: #334155;
+            --bg-tertiary: #475569;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border-color: #475569;
+            --card-bg: #334155;
+            --modal-bg: #334155;
+            --modal-overlay: rgba(0, 0, 0, 0.75);
+            --primary-gradient: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            --primary-solid: #64748b;
+            --primary-hover: #475569;
+            --accent-orange: #fb923c;
+            --accent-orange-hover: #f97316;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.25);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-primary); color: var(--text-primary); }
+        .metric-card { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; box-shadow: var(--card-shadow); color: var(--text-primary); }
+        .metric-card .value { font-size: 2rem; font-weight: 700; color: var(--primary-solid); }
+        .metric-card .label { font-size: 0.875rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.5rem; }
+        .table-container { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; box-shadow: var(--card-shadow); margin-bottom: 2rem; color: var(--text-primary); }
+        .chart-container { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; box-shadow: var(--card-shadow); min-height: 400px; }
+        thead th { background-color: var(--bg-tertiary) !important; color: var(--text-primary) !important; font-weight: 600; padding: 0.5rem; }
+        /* Column Filter Dropdowns with Checkboxes */
+        .column-filter-btn { width: 100%; padding: 0.5rem 0.75rem; border: 2px solid var(--border-color); border-radius: 6px; font-size: 0.875rem; background-color: var(--card-bg); color: var(--text-primary); font-weight: 500; cursor: pointer; transition: var(--transition-smooth); text-align: left; display: flex; justify-content: space-between; align-items: center; }
+        .column-filter-btn:hover { border-color: var(--primary-solid); box-shadow: 0 0 0 0.15rem rgba(79, 70, 229, 0.15); }
+        .column-filter-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 6px; max-height: 300px; overflow-y: auto; z-index: 1000; display: none; box-shadow: var(--card-shadow); margin-top: 0.25rem; }
+        .column-filter-dropdown.show { display: block; }
+        .filter-option { padding: 0.5rem 0.75rem; display: flex; align-items: center; cursor: pointer; transition: background-color 0.2s; }
+        .filter-option:hover { background-color: var(--bg-tertiary); }
+        .filter-option input[type="checkbox"] { margin-right: 0.5rem; cursor: pointer; }
+        .filter-option label { cursor: pointer; flex-grow: 1; margin: 0; color: var(--text-primary); }
+        .filter-search { padding: 0.5rem; border-bottom: 1px solid var(--border-color); }
+        .filter-search input { width: 100%; padding: 0.25rem 0.5rem; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary); }
+        .filter-actions { padding: 0.5rem; border-top: 1px solid var(--border-color); display: flex; gap: 0.5rem; }
+        .filter-actions button { flex: 1; padding: 0.25rem 0.5rem; border: 1px solid var(--border-color); border-radius: 4px; background: var(--card-bg); color: var(--text-primary); cursor: pointer; font-size: 0.75rem; }
+        .filter-actions button:hover { background: var(--bg-tertiary); }
+        .filter-count { display: inline-block; margin-left: 0.5rem; background: var(--primary-solid); color: white; padding: 0.125rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .table { margin-bottom: 0; color: var(--text-primary); }
+        .dt-buttons { margin-bottom: 0.75rem; }
+        .dt-button { margin-left: 0.5rem !important; }
+        #clearFiltersBtn { margin-top: 0.25rem; }
+        /* Row Selection Styles */
+        .table tbody tr { cursor: pointer; transition: background-color 0.2s ease; }
+        .table tbody tr:hover { background-color: rgba(102, 126, 234, 0.1) !important; }
+        .table tbody tr:active { background-color: rgba(102, 126, 234, 0.2) !important; }
+        /* Detail View Modal */
+        .detail-modal .modal-dialog { max-width: 800px; }
+        .detail-modal .modal-content { background: var(--modal-bg); color: var(--text-primary); }
+        .detail-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+        .detail-item { background: var(--bg-tertiary); padding: 0.75rem; border-radius: 6px; border-left: 3px solid var(--primary-solid); }
+        .detail-item .label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.25rem; }
+        .detail-item .value { font-size: 0.95rem; color: var(--text-primary); font-family: "Courier New", monospace; word-break: break-all; }
+        /* Chart Thumbnail Styles */
+        .chart-thumbnail-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+        .chart-thumbnail { background: var(--card-bg); border-radius: 12px; padding: 1rem; box-shadow: var(--card-shadow); cursor: pointer; transition: var(--transition-smooth); border: 2px solid transparent; }
+        .chart-thumbnail:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); border-color: var(--primary-solid); }
+        .chart-thumbnail h5 { margin-bottom: 0.75rem; color: var(--text-primary); font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+        .chart-thumbnail canvas { width: 100% !important; height: 200px !important; }
+        .chart-thumbnail-badge { background: var(--primary-solid); color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; }
+        /* DataTables Dark Mode */
+        :root[data-theme="dark"] .dataTables_wrapper { color: var(--text-primary); }
+        :root[data-theme="dark"] .dataTable thead th { background-color: var(--bg-tertiary) !important; color: var(--text-primary) !important; }
+        :root[data-theme="dark"] .dataTable tbody tr { background-color: var(--card-bg); color: var(--text-primary); }
+        :root[data-theme="dark"] .dataTable tbody tr:hover { background-color: var(--bg-tertiary) !important; }
+        :root[data-theme="dark"] .dataTables_info, :root[data-theme="dark"] .dataTables_length label, :root[data-theme="dark"] .dataTables_filter label { color: var(--text-primary); }
+        :root[data-theme="dark"] .dataTables_paginate .page-link { background-color: var(--card-bg); border-color: var(--border-color); color: var(--text-primary); }
+        :root[data-theme="dark"] .dataTables_paginate .page-link:hover { background-color: var(--bg-tertiary); border-color: var(--primary-solid); }
+        :root[data-theme="dark"] .dataTables_paginate .page-item.active .page-link { background-color: var(--primary-solid); border-color: var(--primary-solid); }
+        /* Modal Dark Mode */
+        :root[data-theme="dark"] .modal-content { background: var(--modal-bg); color: var(--text-primary); border-color: var(--border-color); }
+        :root[data-theme="dark"] .modal-header { border-bottom-color: var(--border-color); }
+        :root[data-theme="dark"] .modal-footer { border-top-color: var(--border-color); }
+        :root[data-theme="dark"] .btn-close { filter: invert(1); }
+    </style>
+</head>
+<body>
+    <div class="hero-header" style="background: var(--primary-gradient); color: white; padding: 2rem;">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>Procmon Professional Analysis - TEST-ENHANCED-20251107-222054</h1>            <button id="themeToggle" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-moon" id="darkIcon"></i>
+                <i class="fas fa-sun" id="lightIcon" style="display:none;"></i>
+                <span id="themeText" class="ms-2">Dark Mode</span>
+            </button>
+        </div>
+    </div>
+    <div class="container-fluid py-4">
+        <div class="row g-4 mb-4">
+            <div class="col-md-3"><div class="metric-card"><div class="value">100</div><div class="label">Total Records</div></div></div>            <div class="col-md-3"><div class="metric-card"><div class="value">1</div><div class="label">Files Processed</div></div></div>            <div class="col-md-3"><div class="metric-card"><div class="value">4</div><div class="label">Unique Processes</div></div></div>            <div class="col-md-3"><div class="metric-card"><div class="value">4</div><div class="label">Operation Types</div></div></div>        </div>
+        <!-- 6-Tab Navigation Structure -->
+        <ul class="nav nav-tabs" id="reportTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tab-summary-btn" data-bs-toggle="tab" data-bs-target="#tab-summary" type="button" role="tab">
+                    <i class="fas fa-briefcase me-2"></i>Executive Summary
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-patterns-btn" data-bs-toggle="tab" data-bs-target="#tab-patterns" type="button" role="tab">
+                    <i class="fas fa-brain me-2"></i>Pattern Recognition
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-analytics-btn" data-bs-toggle="tab" data-bs-target="#tab-analytics" type="button" role="tab">
+                    <i class="fas fa-chart-line me-2"></i>Advanced Analytics
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-ml-btn" data-bs-toggle="tab" data-bs-target="#tab-ml" type="button" role="tab">
+                    <i class="fas fa-robot me-2"></i>ML Analytics
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-events-btn" data-bs-toggle="tab" data-bs-target="#tab-events" type="button" role="tab">
+                    <i class="fas fa-table me-2"></i>Event Details
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-charts-btn" data-bs-toggle="tab" data-bs-target="#tab-charts" type="button" role="tab">
+                    <i class="fas fa-chart-pie me-2"></i>Charts
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content mt-4" id="reportTabContent">
+
+            <!-- Tab 1: Executive Summary -->
+            <div class="tab-pane fade show active" id="tab-summary" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <div class="table-container">
+                            <h3><i class="fas fa-briefcase me-2"></i>Executive Summary</h3>
+                            <div class="alert alert-info"><strong>Health Score:</strong> 100.0/100</div>                            <h5 class="mt-4">Key Insights</h5>
+                            <ul class="list-group">
+                                <li class="list-group-item">System performing well with low error rate: 0%</li>                            </ul>
+                            <h5 class="mt-4">Recommendations</h5>
+                            <ul class="list-group">
+                                <li class="list-group-item">System health is good - continue monitoring</li>                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Pattern Recognition -->
+            <div class="tab-pane fade" id="tab-patterns" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <div class="table-container">
+                            <h3><i class="fas fa-brain me-2"></i>Pattern Recognition Analysis</h3>
+                            <p class="lead">Detected 0 patterns across the dataset</p>                            <h5 class="mt-4">Detected Patterns</h5>
+                            <div class="row">
+                            </div>
+                            <h5 class="mt-4">Process Clusters</h5>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="metric-card">
+                                        <div class="label">System Critical Activity Processes</div>                                        <div class="value">0</div>                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="metric-card">
+                                        <div class="label">Standard Operations Activity Processes</div>                                        <div class="value">4</div>                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="metric-card">
+                                        <div class="label">Background Tasks Activity Processes</div>                                        <div class="value">0</div>                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Advanced Analytics -->
+            <div class="tab-pane fade" id="tab-analytics" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <div class="table-container">
+                            <h3><i class="fas fa-chart-line me-2"></i>Advanced Analytics</h3>
+                            <div class="row mb-4">
+                                <div class="col-md-3"><div class="metric-card"><div class="value">100</div><div class="label">Total Events</div></div></div>                                <div class="col-md-3"><div class="metric-card"><div class="value">0.0%</div><div class="label">Error Rate</div></div></div>                                <div class="col-md-3"><div class="metric-card"><div class="value">0</div><div class="label">Anomalies Detected</div></div></div>                                <div class="col-md-3"><div class="metric-card"><div class="value">Low</div><div class="label">Risk Level</div></div></div>                            </div>
+                            <h5 class="mt-4">Anomaly Detection Results</h5>
+                            <div class="alert alert-success">No anomalies detected</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: ML Analytics -->
+            <div class="tab-pane fade" id="tab-ml" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <div class="table-container">
+                            <h3><i class="fas fa-robot me-2"></i>Machine Learning Analytics</h3>
+                            <p class="lead">Combined ML/AI insights from pattern recognition and advanced analytics engines</p>
+                            <h5 class="mt-4">ML Predictions & Insights</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="alert alert-primary">
+                                        <h6>Temporal Analysis</h6>
+                                        <p><strong>Trend:</strong> Stable</p>                                        <p><strong>Seasonality:</strong> 0.4</p>                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="alert alert-success">
+                                        <h6>Risk Assessment</h6>
+                                        <p><strong>Overall Risk:</strong> Low</p>                                        <p><strong>Risk Score:</strong> 0/100</p>                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 5: Event Details -->
+            <div class="tab-pane fade lazy-load" id="tab-events" role="tabpanel" data-lazy="tables">
+                <div class="table-container">
+            <h4>Event Details (Showing first 100 records)</h4>            <table class="table table-striped">
+                <thead><tr><th>#</th>
+                    <th>TimeOfDay</th>                    <th>ProcessName</th>                    <th>PID</th>                    <th>Operation</th>                    <th>Path</th>                    <th>Result</th>                    <th>Detail</th>                </thead>
+                <tbody>
+                    <tr><td>1</td>                        <td>22:19:54.2874604</td>                        <td>notepad.exe</td>                        <td>1001</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file1.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 1</td>                    </tr>
+                    <tr><td>2</td>                        <td>22:18:54.3051860</td>                        <td>explorer.exe</td>                        <td>1002</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file2.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 2</td>                    </tr>
+                    <tr><td>3</td>                        <td>22:17:54.3051860</td>                        <td>svchost.exe</td>                        <td>1003</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file3.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 3</td>                    </tr>
+                    <tr><td>4</td>                        <td>22:16:54.3051860</td>                        <td>chrome.exe</td>                        <td>1004</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file4.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 4</td>                    </tr>
+                    <tr><td>5</td>                        <td>22:15:54.3051860</td>                        <td>notepad.exe</td>                        <td>1005</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file5.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 5</td>                    </tr>
+                    <tr><td>6</td>                        <td>22:14:54.3051860</td>                        <td>explorer.exe</td>                        <td>1006</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file6.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 6</td>                    </tr>
+                    <tr><td>7</td>                        <td>22:13:54.3051860</td>                        <td>svchost.exe</td>                        <td>1007</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file7.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 7</td>                    </tr>
+                    <tr><td>8</td>                        <td>22:12:54.3051860</td>                        <td>chrome.exe</td>                        <td>1008</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file8.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 8</td>                    </tr>
+                    <tr><td>9</td>                        <td>22:11:54.3051860</td>                        <td>notepad.exe</td>                        <td>1009</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file9.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 9</td>                    </tr>
+                    <tr><td>10</td>                        <td>22:10:54.3051860</td>                        <td>explorer.exe</td>                        <td>1000</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file10.dll</td>                        <td>ERROR</td>                        <td>Test detail for event 10</td>                    </tr>
+                    <tr><td>11</td>                        <td>22:09:54.3051860</td>                        <td>svchost.exe</td>                        <td>1001</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file11.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 11</td>                    </tr>
+                    <tr><td>12</td>                        <td>22:08:54.3051860</td>                        <td>chrome.exe</td>                        <td>1002</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file12.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 12</td>                    </tr>
+                    <tr><td>13</td>                        <td>22:07:54.3051860</td>                        <td>notepad.exe</td>                        <td>1003</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file13.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 13</td>                    </tr>
+                    <tr><td>14</td>                        <td>22:06:54.3051860</td>                        <td>explorer.exe</td>                        <td>1004</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file14.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 14</td>                    </tr>
+                    <tr><td>15</td>                        <td>22:05:54.3051860</td>                        <td>svchost.exe</td>                        <td>1005</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file15.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 15</td>                    </tr>
+                    <tr><td>16</td>                        <td>22:04:54.3051860</td>                        <td>chrome.exe</td>                        <td>1006</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file16.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 16</td>                    </tr>
+                    <tr><td>17</td>                        <td>22:03:54.3051860</td>                        <td>notepad.exe</td>                        <td>1007</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file17.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 17</td>                    </tr>
+                    <tr><td>18</td>                        <td>22:02:54.3051860</td>                        <td>explorer.exe</td>                        <td>1008</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file18.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 18</td>                    </tr>
+                    <tr><td>19</td>                        <td>22:01:54.3051860</td>                        <td>svchost.exe</td>                        <td>1009</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file19.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 19</td>                    </tr>
+                    <tr><td>20</td>                        <td>22:00:54.3051860</td>                        <td>chrome.exe</td>                        <td>1000</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file20.dll</td>                        <td>ERROR</td>                        <td>Test detail for event 20</td>                    </tr>
+                    <tr><td>21</td>                        <td>21:59:54.3051860</td>                        <td>notepad.exe</td>                        <td>1001</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file21.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 21</td>                    </tr>
+                    <tr><td>22</td>                        <td>21:58:54.3051860</td>                        <td>explorer.exe</td>                        <td>1002</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file22.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 22</td>                    </tr>
+                    <tr><td>23</td>                        <td>21:57:54.3051860</td>                        <td>svchost.exe</td>                        <td>1003</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file23.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 23</td>                    </tr>
+                    <tr><td>24</td>                        <td>21:56:54.3051860</td>                        <td>chrome.exe</td>                        <td>1004</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file24.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 24</td>                    </tr>
+                    <tr><td>25</td>                        <td>21:55:54.3051860</td>                        <td>notepad.exe</td>                        <td>1005</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file25.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 25</td>                    </tr>
+                    <tr><td>26</td>                        <td>21:54:54.3051860</td>                        <td>explorer.exe</td>                        <td>1006</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file26.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 26</td>                    </tr>
+                    <tr><td>27</td>                        <td>21:53:54.3051860</td>                        <td>svchost.exe</td>                        <td>1007</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file27.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 27</td>                    </tr>
+                    <tr><td>28</td>                        <td>21:52:54.3051860</td>                        <td>chrome.exe</td>                        <td>1008</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file28.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 28</td>                    </tr>
+                    <tr><td>29</td>                        <td>21:51:54.3051860</td>                        <td>notepad.exe</td>                        <td>1009</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file29.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 29</td>                    </tr>
+                    <tr><td>30</td>                        <td>21:50:54.3051860</td>                        <td>explorer.exe</td>                        <td>1000</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file30.dll</td>                        <td>ERROR</td>                        <td>Test detail for event 30</td>                    </tr>
+                    <tr><td>31</td>                        <td>21:49:54.3051860</td>                        <td>svchost.exe</td>                        <td>1001</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file31.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 31</td>                    </tr>
+                    <tr><td>32</td>                        <td>21:48:54.3051860</td>                        <td>chrome.exe</td>                        <td>1002</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file32.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 32</td>                    </tr>
+                    <tr><td>33</td>                        <td>21:47:54.3051860</td>                        <td>notepad.exe</td>                        <td>1003</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file33.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 33</td>                    </tr>
+                    <tr><td>34</td>                        <td>21:46:54.3051860</td>                        <td>explorer.exe</td>                        <td>1004</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file34.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 34</td>                    </tr>
+                    <tr><td>35</td>                        <td>21:45:54.3051860</td>                        <td>svchost.exe</td>                        <td>1005</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file35.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 35</td>                    </tr>
+                    <tr><td>36</td>                        <td>21:44:54.3051860</td>                        <td>chrome.exe</td>                        <td>1006</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file36.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 36</td>                    </tr>
+                    <tr><td>37</td>                        <td>21:43:54.3051860</td>                        <td>notepad.exe</td>                        <td>1007</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file37.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 37</td>                    </tr>
+                    <tr><td>38</td>                        <td>21:42:54.3051860</td>                        <td>explorer.exe</td>                        <td>1008</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file38.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 38</td>                    </tr>
+                    <tr><td>39</td>                        <td>21:41:54.3051860</td>                        <td>svchost.exe</td>                        <td>1009</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file39.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 39</td>                    </tr>
+                    <tr><td>40</td>                        <td>21:40:54.3051860</td>                        <td>chrome.exe</td>                        <td>1000</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file40.dll</td>                        <td>ERROR</td>                        <td>Test detail for event 40</td>                    </tr>
+                    <tr><td>41</td>                        <td>21:39:54.3051860</td>                        <td>notepad.exe</td>                        <td>1001</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file41.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 41</td>                    </tr>
+                    <tr><td>42</td>                        <td>21:38:54.3051860</td>                        <td>explorer.exe</td>                        <td>1002</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file42.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 42</td>                    </tr>
+                    <tr><td>43</td>                        <td>21:37:54.3051860</td>                        <td>svchost.exe</td>                        <td>1003</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file43.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 43</td>                    </tr>
+                    <tr><td>44</td>                        <td>21:36:54.3051860</td>                        <td>chrome.exe</td>                        <td>1004</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file44.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 44</td>                    </tr>
+                    <tr><td>45</td>                        <td>21:35:54.3051860</td>                        <td>notepad.exe</td>                        <td>1005</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file45.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 45</td>                    </tr>
+                    <tr><td>46</td>                        <td>21:34:54.3051860</td>                        <td>explorer.exe</td>                        <td>1006</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file46.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 46</td>                    </tr>
+                    <tr><td>47</td>                        <td>21:33:54.3051860</td>                        <td>svchost.exe</td>                        <td>1007</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file47.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 47</td>                    </tr>
+                    <tr><td>48</td>                        <td>21:32:54.3051860</td>                        <td>chrome.exe</td>                        <td>1008</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file48.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 48</td>                    </tr>
+                    <tr><td>49</td>                        <td>21:31:54.3051860</td>                        <td>notepad.exe</td>                        <td>1009</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file49.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 49</td>                    </tr>
+                    <tr><td>50</td>                        <td>21:30:54.3051860</td>                        <td>explorer.exe</td>                        <td>1000</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file50.dll</td>                        <td>ERROR</td>                        <td>Test detail for event 50</td>                    </tr>
+                    <tr><td>51</td>                        <td>21:29:54.3051860</td>                        <td>svchost.exe</td>                        <td>1001</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file51.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 51</td>                    </tr>
+                    <tr><td>52</td>                        <td>21:28:54.3051860</td>                        <td>chrome.exe</td>                        <td>1002</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file52.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 52</td>                    </tr>
+                    <tr><td>53</td>                        <td>21:27:54.3051860</td>                        <td>notepad.exe</td>                        <td>1003</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file53.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 53</td>                    </tr>
+                    <tr><td>54</td>                        <td>21:26:54.3051860</td>                        <td>explorer.exe</td>                        <td>1004</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file54.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 54</td>                    </tr>
+                    <tr><td>55</td>                        <td>21:25:54.3051860</td>                        <td>svchost.exe</td>                        <td>1005</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file55.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 55</td>                    </tr>
+                    <tr><td>56</td>                        <td>21:24:54.3051860</td>                        <td>chrome.exe</td>                        <td>1006</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file56.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 56</td>                    </tr>
+                    <tr><td>57</td>                        <td>21:23:54.3051860</td>                        <td>notepad.exe</td>                        <td>1007</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file57.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 57</td>                    </tr>
+                    <tr><td>58</td>                        <td>21:22:54.3051860</td>                        <td>explorer.exe</td>                        <td>1008</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file58.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 58</td>                    </tr>
+                    <tr><td>59</td>                        <td>21:21:54.3051860</td>                        <td>svchost.exe</td>                        <td>1009</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file59.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 59</td>                    </tr>
+                    <tr><td>60</td>                        <td>21:20:54.3051860</td>                        <td>chrome.exe</td>                        <td>1000</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file60.dll</td>                        <td>ERROR</td>                        <td>Test detail for event 60</td>                    </tr>
+                    <tr><td>61</td>                        <td>21:19:54.3051860</td>                        <td>notepad.exe</td>                        <td>1001</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file61.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 61</td>                    </tr>
+                    <tr><td>62</td>                        <td>21:18:54.3051860</td>                        <td>explorer.exe</td>                        <td>1002</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file62.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 62</td>                    </tr>
+                    <tr><td>63</td>                        <td>21:17:54.3051860</td>                        <td>svchost.exe</td>                        <td>1003</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file63.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 63</td>                    </tr>
+                    <tr><td>64</td>                        <td>21:16:54.3051860</td>                        <td>chrome.exe</td>                        <td>1004</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file64.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 64</td>                    </tr>
+                    <tr><td>65</td>                        <td>21:15:54.3051860</td>                        <td>notepad.exe</td>                        <td>1005</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file65.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 65</td>                    </tr>
+                    <tr><td>66</td>                        <td>21:14:54.3051860</td>                        <td>explorer.exe</td>                        <td>1006</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file66.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 66</td>                    </tr>
+                    <tr><td>67</td>                        <td>21:13:54.3051860</td>                        <td>svchost.exe</td>                        <td>1007</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file67.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 67</td>                    </tr>
+                    <tr><td>68</td>                        <td>21:12:54.3051860</td>                        <td>chrome.exe</td>                        <td>1008</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file68.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 68</td>                    </tr>
+                    <tr><td>69</td>                        <td>21:11:54.3051860</td>                        <td>notepad.exe</td>                        <td>1009</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file69.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 69</td>                    </tr>
+                    <tr><td>70</td>                        <td>21:10:54.3051860</td>                        <td>explorer.exe</td>                        <td>1000</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file70.dll</td>                        <td>ERROR</td>                        <td>Test detail for event 70</td>                    </tr>
+                    <tr><td>71</td>                        <td>21:09:54.3051860</td>                        <td>svchost.exe</td>                        <td>1001</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file71.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 71</td>                    </tr>
+                    <tr><td>72</td>                        <td>21:08:54.3051860</td>                        <td>chrome.exe</td>                        <td>1002</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file72.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 72</td>                    </tr>
+                    <tr><td>73</td>                        <td>21:07:54.3051860</td>                        <td>notepad.exe</td>                        <td>1003</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file73.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 73</td>                    </tr>
+                    <tr><td>74</td>                        <td>21:06:54.3051860</td>                        <td>explorer.exe</td>                        <td>1004</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file74.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 74</td>                    </tr>
+                    <tr><td>75</td>                        <td>21:05:54.3051860</td>                        <td>svchost.exe</td>                        <td>1005</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file75.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 75</td>                    </tr>
+                    <tr><td>76</td>                        <td>21:04:54.3051860</td>                        <td>chrome.exe</td>                        <td>1006</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file76.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 76</td>                    </tr>
+                    <tr><td>77</td>                        <td>21:03:54.3051860</td>                        <td>notepad.exe</td>                        <td>1007</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file77.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 77</td>                    </tr>
+                    <tr><td>78</td>                        <td>21:02:54.3051860</td>                        <td>explorer.exe</td>                        <td>1008</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file78.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 78</td>                    </tr>
+                    <tr><td>79</td>                        <td>21:01:54.3051860</td>                        <td>svchost.exe</td>                        <td>1009</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file79.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 79</td>                    </tr>
+                    <tr><td>80</td>                        <td>21:00:54.3051860</td>                        <td>chrome.exe</td>                        <td>1000</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file80.dll</td>                        <td>ERROR</td>                        <td>Test detail for event 80</td>                    </tr>
+                    <tr><td>81</td>                        <td>20:59:54.3051860</td>                        <td>notepad.exe</td>                        <td>1001</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file81.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 81</td>                    </tr>
+                    <tr><td>82</td>                        <td>20:58:54.3051860</td>                        <td>explorer.exe</td>                        <td>1002</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file82.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 82</td>                    </tr>
+                    <tr><td>83</td>                        <td>20:57:54.3051860</td>                        <td>svchost.exe</td>                        <td>1003</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file83.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 83</td>                    </tr>
+                    <tr><td>84</td>                        <td>20:56:54.3051860</td>                        <td>chrome.exe</td>                        <td>1004</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file84.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 84</td>                    </tr>
+                    <tr><td>85</td>                        <td>20:55:54.3051860</td>                        <td>notepad.exe</td>                        <td>1005</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file85.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 85</td>                    </tr>
+                    <tr><td>86</td>                        <td>20:54:54.3051860</td>                        <td>explorer.exe</td>                        <td>1006</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file86.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 86</td>                    </tr>
+                    <tr><td>87</td>                        <td>20:53:54.3051860</td>                        <td>svchost.exe</td>                        <td>1007</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file87.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 87</td>                    </tr>
+                    <tr><td>88</td>                        <td>20:52:54.3051860</td>                        <td>chrome.exe</td>                        <td>1008</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file88.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 88</td>                    </tr>
+                    <tr><td>89</td>                        <td>20:51:54.3051860</td>                        <td>notepad.exe</td>                        <td>1009</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file89.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 89</td>                    </tr>
+                    <tr><td>90</td>                        <td>20:50:54.3051860</td>                        <td>explorer.exe</td>                        <td>1000</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file90.dll</td>                        <td>ERROR</td>                        <td>Test detail for event 90</td>                    </tr>
+                    <tr><td>91</td>                        <td>20:49:54.3051860</td>                        <td>svchost.exe</td>                        <td>1001</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file91.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 91</td>                    </tr>
+                    <tr><td>92</td>                        <td>20:48:54.3051860</td>                        <td>chrome.exe</td>                        <td>1002</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file92.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 92</td>                    </tr>
+                    <tr><td>93</td>                        <td>20:47:54.3051860</td>                        <td>notepad.exe</td>                        <td>1003</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file93.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 93</td>                    </tr>
+                    <tr><td>94</td>                        <td>20:46:54.3051860</td>                        <td>explorer.exe</td>                        <td>1004</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file94.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 94</td>                    </tr>
+                    <tr><td>95</td>                        <td>20:45:54.3051860</td>                        <td>svchost.exe</td>                        <td>1005</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file95.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 95</td>                    </tr>
+                    <tr><td>96</td>                        <td>20:44:54.3051860</td>                        <td>chrome.exe</td>                        <td>1006</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file96.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 96</td>                    </tr>
+                    <tr><td>97</td>                        <td>20:43:54.3051860</td>                        <td>notepad.exe</td>                        <td>1007</td>                        <td>RegOpenKey</td>                        <td>C:\Windows\System32\file97.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 97</td>                    </tr>
+                    <tr><td>98</td>                        <td>20:42:54.3051860</td>                        <td>explorer.exe</td>                        <td>1008</td>                        <td>ReadFile</td>                        <td>C:\Windows\System32\file98.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 98</td>                    </tr>
+                    <tr><td>99</td>                        <td>20:41:54.3051860</td>                        <td>svchost.exe</td>                        <td>1009</td>                        <td>WriteFile</td>                        <td>C:\Windows\System32\file99.dll</td>                        <td>SUCCESS</td>                        <td>Test detail for event 99</td>                    </tr>
+                    <tr><td>100</td>                        <td>20:40:54.3051860</td>                        <td>chrome.exe</td>                        <td>1000</td>                        <td>CreateFile</td>                        <td>C:\Windows\System32\file100.dll</td>                        <td>ERROR</td>                        <td>Test detail for event 100</td>                    </tr>
+                </tbody>
+            </table>
+                </div>
+            </div>
+
+            <!-- Tab 6: Charts -->
+            <div class="tab-pane fade lazy-load" id="tab-charts" role="tabpanel" data-lazy="charts">
+                <div class="chart-container">
+                    <h3 class="mb-3"><i class="fas fa-chart-bar me-2"></i>Data Visualizations</h3>
+                    <div class="chart-thumbnail-container">
+                        <div class="chart-thumbnail" data-bs-toggle="modal" data-bs-target="#processChartModal">
+                            <h5><i class="fas fa-chart-bar me-2"></i>Process Distribution <span class="chart-thumbnail-badge">Click to expand</span></h5>
+                            <canvas id="processThumbnail" data-labels="'chrome.exe','notepad.exe','explorer.exe','svchost.exe'" data-data="30,25,25,20"></canvas>                        </div>
+                        <div class="chart-thumbnail" data-bs-toggle="modal" data-bs-target="#operationChartModal">
+                            <h5><i class="fas fa-chart-pie me-2"></i>Operation Distribution <span class="chart-thumbnail-badge">Click to expand</span></h5>
+                            <canvas id="operationThumbnail" data-labels="'CreateFile','RegOpenKey','ReadFile','WriteFile'" data-data="35,30,20,15"></canvas>                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Process Chart Modal -->
+        <div class="modal fade" id="processChartModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Top Processes Distribution</h5>
+                        <div class="btn-group btn-group-sm ms-3" role="group">
+                            <button type="button" class="btn btn-outline-primary chart-type-btn" data-chart="process" data-type="bar">Bar</button>
+                            <button type="button" class="btn btn-outline-primary chart-type-btn" data-chart="process" data-type="pie">Pie</button>
+                            <button type="button" class="btn btn-outline-primary chart-type-btn" data-chart="process" data-type="doughnut">Doughnut</button>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <canvas id="processChart" data-labels="'chrome.exe','notepad.exe','explorer.exe','svchost.exe'" data-data="30,25,25,20" style="max-height: 500px;"></canvas>                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="downloadProcessChart"><i class="fas fa-download"></i> Download PNG</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Operation Chart Modal -->
+        <div class="modal fade" id="operationChartModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Top Operations Distribution</h5>
+                        <div class="btn-group btn-group-sm ms-3" role="group">
+                            <button type="button" class="btn btn-outline-success chart-type-btn" data-chart="operation" data-type="bar">Bar</button>
+                            <button type="button" class="btn btn-outline-success chart-type-btn" data-chart="operation" data-type="pie">Pie</button>
+                            <button type="button" class="btn btn-outline-success chart-type-btn" data-chart="operation" data-type="doughnut">Doughnut</button>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <canvas id="operationChart" data-labels="'CreateFile','RegOpenKey','ReadFile','WriteFile'" data-data="35,30,20,15" style="max-height: 500px;"></canvas>                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="downloadOperationChart"><i class="fas fa-download"></i> Download PNG</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row Detail Modal -->
+        <div class="modal fade detail-modal" id="rowDetailModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-info-circle"></i> Event Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="detailContent" class="detail-content">
+                            <!-- Dynamic content will be inserted here -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer" style="padding: 2rem; text-align: center; margin-top: 3rem;">
+            <p><strong>Generated:</strong> 2025-11-07 22:20:55 | <strong>Computer:</strong> LEIGHSLAPTOP</p>        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables Core -->
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+    <!-- DataTables Extensions -->
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+    <!-- Export Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.js"></script>
+    <!-- Search Enhancement Module -->
+    <script src="./Search-Enhancement.js"></script>
+    <!-- Dynamic Chart Enhancement -->
+    <script src="./Add-DynamicChartScript.js"></script>
+    <script>
+        // Lazy Loading Observer for Performance Optimization
+        let chartsLoaded = false;
+        let tablesLoaded = false;
+        let dataTableInstance = null;
+
+        const lazyLoadObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const element = entry.target;
+                    const lazyType = element.dataset.lazy;
+
+                    if (lazyType === "charts" && !chartsLoaded) {
+                        loadChartThumbnails();
+                        chartsLoaded = true;
+                    } else if (lazyType === "tables" && !tablesLoaded) {
+                        loadDataTable();
+                        tablesLoaded = true;
+                    }
+
+                    lazyLoadObserver.unobserve(element);
+                }
+            });
+        }, { rootMargin: "50px" });
+
+        $(document).ready(function() {
+            // Observe lazy-load elements
+            document.querySelectorAll(".lazy-load").forEach(el => {
+                lazyLoadObserver.observe(el);
+            });
+
+            // Theme Management
+            const root = document.documentElement;
+            const themeToggle = document.getElementById("themeToggle");
+            const darkIcon = document.getElementById("darkIcon");
+            const lightIcon = document.getElementById("lightIcon");
+            const themeText = document.getElementById("themeText");
+
+            // Load saved theme or default to light
+            const savedTheme = localStorage.getItem("theme") || "light";
+            applyTheme(savedTheme);
+
+            function applyTheme(theme) {
+                root.setAttribute("data-theme", theme);
+                localStorage.setItem("theme", theme);
+
+                if (theme === "dark") {
+                    darkIcon.style.display = "none";
+                    lightIcon.style.display = "inline";
+                    themeText.textContent = "Light Mode";
+                } else {
+                    darkIcon.style.display = "inline";
+                    lightIcon.style.display = "none";
+                    themeText.textContent = "Dark Mode";
+                }
+            }
+
+            // Toggle theme on button click
+            themeToggle.addEventListener("click", function() {
+                const currentTheme = root.getAttribute("data-theme");
+                const newTheme = currentTheme === "light" ? "dark" : "light";
+                applyTheme(newTheme);
+            });
+
+            // Function to load DataTable (called by lazy loading)
+            window.loadDataTable = function() {
+                if (dataTableInstance) return; // Already initialized
+
+                dataTableInstance = $(".table").DataTable({
+                pageLength: 25,
+                lengthMenu: [[10, 25, 50, 100, 500, -1], ["10 rows", "25 rows", "50 rows", "100 rows", "500 rows", "Show all"]],
+                order: [[0, "asc"]],
+                responsive: true,
+                dom: "<\"row mb-3\"<\"col-sm-12 col-md-6\"l><\"col-sm-12 col-md-6 text-end\"B>>" +
+                     "<\"row\"<\"col-sm-12 col-md-6\"f><\"col-sm-12 col-md-6 text-end\"<\"clear-filters\">>>" +
+                     "<\"row\"<\"col-sm-12\"tr>>" +
+                     "<\"row\"<\"col-sm-12 col-md-5\"i><\"col-sm-12 col-md-7\"p>>",
+                buttons: [
+                    {
+                        extend: "excel",
+                        text: "<i class=\"fas fa-file-excel\"></i> Excel",
+                        className: "btn btn-success btn-sm me-1",
+                        title: "Procmon Analysis - " + new Date().toISOString().split("T")[0],
+                        exportOptions: { orthogonal: "export" }
+                    },
+                    {
+                        extend: "csv",
+                        text: "<i class=\"fas fa-file-csv\"></i> CSV",
+                        className: "btn btn-info btn-sm me-1",
+                        title: "Procmon Analysis - " + new Date().toISOString().split("T")[0],
+                        exportOptions: { orthogonal: "export" }
+                    },
+                    {
+                        extend: "pdf",
+                        text: "<i class=\"fas fa-file-pdf\"></i> PDF",
+                        className: "btn btn-danger btn-sm me-1",
+                        title: "Procmon Analysis",
+                        orientation: "landscape",
+                        pageSize: "LEGAL",
+                        exportOptions: { orthogonal: "export" }
+                    },
+                    {
+                        extend: "copy",
+                        text: "<i class=\"fas fa-copy\"></i> Copy",
+                        className: "btn btn-secondary btn-sm me-1",
+                        exportOptions: { orthogonal: "export" }
+                    },
+                    {
+                        extend: "print",
+                        text: "<i class=\"fas fa-print\"></i> Print",
+                        className: "btn btn-dark btn-sm",
+                        exportOptions: { orthogonal: "export" }
+                    }
+                ],
+                initComplete: function() {
+                    // Add column-specific checkbox filter dropdowns
+                    this.api().columns().every(function(colIdx) {
+                        var column = this;
+                        var title = $(column.header()).text();
+                        
+                        // Create filter container
+                        var filterContainer = $("<div style=\"position: relative;\"></div>").appendTo($(column.header()).empty());
+                        
+                        // Create filter button
+                        var filterBtn = $("<button class=\"column-filter-btn\" type=\"button\">" +
+                            "<span class=\"filter-text\">" + title + "</span>" +
+                            "<i class=\"fas fa-chevron-down\"></i>" +
+                            "</button>").appendTo(filterContainer);
+                        
+                        // Create dropdown
+                        var dropdown = $("<div class=\"column-filter-dropdown\"></div>").appendTo(filterContainer);
+                        
+                        // Add search box
+                        var searchBox = $("<div class=\"filter-search\"><input type=\"text\" placeholder=\"Search...\" class=\"filter-search-input\"></div>").appendTo(dropdown);
+                        
+                        // Create options container
+                        var optionsContainer = $("<div class=\"filter-options\"></div>").appendTo(dropdown);
+                        
+                        // Get unique values sorted
+                        var uniqueValues = [];
+                        column.data().unique().sort().each(function(d) {
+                            if (d) uniqueValues.push(d);
+                        });
+                        
+                        // Add checkbox options
+                        uniqueValues.forEach(function(value) {
+                            var optionId = "filter_" + colIdx + "_" + value.replace(/[^a-zA-Z0-9]/g, "_");
+                            var option = $("<div class=\"filter-option\">" +
+                                "<input type=\"checkbox\" id=\"" + optionId + "\" value=\"" + value + "\" checked>" +
+                                "<label for=\"" + optionId + "\">" + value + "</label>" +
+                                "</div>");
+                            optionsContainer.append(option);
+                        });
+                        
+                        // Add action buttons
+                        var actions = $("<div class=\"filter-actions\">" +
+                            "<button class=\"select-all-btn\">Select All</button>" +
+                            "<button class=\"clear-btn\">Clear</button>" +
+                            "</div>").appendTo(dropdown);
+                        
+                        // Toggle dropdown
+                        filterBtn.on("click", function(e) {
+                            e.stopPropagation();
+                            $(".column-filter-dropdown").not(dropdown).removeClass("show");
+                            dropdown.toggleClass("show");
+                        });
+                        
+                        // Search functionality
+                        searchBox.find("input").on("keyup", function() {
+                            var searchTerm = $(this).val().toLowerCase();
+                            optionsContainer.find(".filter-option").each(function() {
+                                var text = $(this).find("label").text().toLowerCase();
+                                $(this).toggle(text.indexOf(searchTerm) > -1);
+                            });
+                        });
+                        
+                        // Checkbox change handler
+                        optionsContainer.on("change", "input[type=\"checkbox\"]", function() {
+                            var selectedValues = [];
+                            optionsContainer.find("input[type=\"checkbox\"]:checked").each(function() {
+                                selectedValues.push($.fn.dataTable.util.escapeRegex($(this).val()));
+                            });
+                            
+                            // Update filter
+                            if (selectedValues.length === uniqueValues.length || selectedValues.length === 0) {
+                                column.search("").draw();
+                            } else {
+                                column.search("^(" + selectedValues.join("|") + ")$", true, false).draw();
+                            }
+                            
+                            // Update button text with count
+                            var checkedCount = optionsContainer.find("input[type=\"checkbox\"]:checked").length;
+                            if (checkedCount < uniqueValues.length) {
+                                filterBtn.find(".filter-text").html(title + " <span class=\"filter-count\">" + checkedCount + "</span>");
+                            } else {
+                                filterBtn.find(".filter-text").text(title);
+                            }
+                        });
+                        
+                        // Select All button
+                        actions.find(".select-all-btn").on("click", function(e) {
+                            e.stopPropagation();
+                            optionsContainer.find("input[type=\"checkbox\"]").prop("checked", true).first().trigger("change");
+                        });
+                        
+                        // Clear button
+                        actions.find(".clear-btn").on("click", function(e) {
+                            e.stopPropagation();
+                            optionsContainer.find("input[type=\"checkbox\"]").prop("checked", false).first().trigger("change");
+                        });
+                    });
+                    
+                    // Close dropdowns when clicking outside
+                    $(document).on("click", function() {
+                        $(".column-filter-dropdown").removeClass("show");
+                    });
+                    
+                    // Add "Clear All Filters" button
+                    $("div.clear-filters").html("<button id=\"clearFiltersBtn\" class=\"btn btn-warning btn-sm\"><i class=\"fas fa-eraser\"></i> Clear All Filters</button>");
+                    
+                    // Initialize Search Enhancement Module
+                    if (window.SearchEnhancement) {
+                        SearchEnhancement.init(table);
+                    }
+                ]
+                });
+            };
+
+            // Clear all filters functionality
+            $(document).on("click", "#clearFiltersBtn", function() {
+                if (!dataTableInstance) return;
+                // Reset all column checkbox filters
+                dataTableInstance.columns().every(function() {
+                    var header = $(this.header());
+                    // Check all checkboxes in this column
+                    header.find("input[type=\"checkbox\"]").prop("checked", true);
+                    // Clear the column search
+                    this.search("");
+                    // Update button text to remove filter count
+                    var title = header.find(".filter-text").text().split(" ")[0];
+                    header.find(".filter-text").text(title);
+                });
+                // Reset main search and redraw
+                dataTableInstance.search("").draw();
+            });
+
+            // Row click handler for detail view
+            $(".table tbody").on("click", "tr", function() {
+                if (!dataTableInstance) return;
+                var rowData = dataTableInstance.row(this).data();
+                if (rowData) {
+                    showRowDetails(rowData);
+                }
+            });
+
+            // Function to display row details in modal
+            function showRowDetails(rowData) {
+                var detailHtml = "";
+                var columnNames = [];
+                $(".table thead th").each(function(index) {
+                    if (index > 0) {
+                        columnNames.push($(this).text().trim().split(" ")[0]);
+                    }
+                });
+                rowData.forEach(function(value, index) {
+                    if (index > 0) {
+                        var fieldName = columnNames[index - 1] || "Field " + index;
+                        var fieldValue = value || "(empty)";
+                        detailHtml += "<div class=\"detail-item\">";
+                        detailHtml += "  <div class=\"label\">" + fieldName + "</div>";
+                        detailHtml += "  <div class=\"value\">" + fieldValue + "</div>";
+                        detailHtml += "</div>";
+                    }
+                });
+                $("#detailContent").html(detailHtml);
+                $("#rowDetailModal").modal("show");
+            }
+
+            // Professional Color Palette
+            const colorPalette = [
+                "rgba(102, 126, 234, 0.8)", "rgba(118, 75, 162, 0.8)", "rgba(40, 167, 69, 0.8)",
+                "rgba(255, 193, 7, 0.8)", "rgba(220, 53, 69, 0.8)", "rgba(23, 162, 184, 0.8)",
+                "rgba(108, 117, 125, 0.8)", "rgba(255, 99, 132, 0.8)", "rgba(54, 162, 235, 0.8)",
+                "rgba(255, 206, 86, 0.8)", "rgba(75, 192, 192, 0.8)", "rgba(153, 102, 255, 0.8)",
+                "rgba(255, 159, 64, 0.8)", "rgba(201, 203, 207, 0.8)", "rgba(255, 99, 71, 0.8)"
+            ];
+
+            // Chart instances
+            let processChartInstance = null;
+            let operationChartInstance = null;
+            let processThumbnailInstance = null;
+            let operationThumbnailInstance = null;
+
+            // Function to load chart thumbnails (called by lazy loading)
+            window.loadChartThumbnails = function() {
+                if (processThumbnailInstance && operationThumbnailInstance) return; // Already loaded
+
+                // Initialize thumbnail charts
+                const processThumbnailCanvas = document.getElementById("processThumbnail");
+                if (processThumbnailCanvas && !processThumbnailInstance) {
+                    const labels = processThumbnailCanvas.dataset.labels.split(",");
+                    const data = processThumbnailCanvas.dataset.data.split(",").map(Number);
+                    processThumbnailInstance = createChart(processThumbnailCanvas, labels, data, "bar", colorPalette[0]);
+                }
+
+                const operationThumbnailCanvas = document.getElementById("operationThumbnail");
+                if (operationThumbnailCanvas && !operationThumbnailInstance) {
+                    const labels = operationThumbnailCanvas.dataset.labels.split(",");
+                    const data = operationThumbnailCanvas.dataset.data.split(",").map(Number);
+                    operationThumbnailInstance = createChart(operationThumbnailCanvas, labels, data, "doughnut", colorPalette[1]);
+                }
+            };
+
+            // Initialize charts when modals open
+            $("#processChartModal").on("shown.bs.modal", function() {
+                if (!processChartInstance) {
+                    const canvas = document.getElementById("processChart");
+                    const labels = canvas.dataset.labels.split(",");
+                    const data = canvas.dataset.data.split(",").map(Number);
+                    processChartInstance = createChart(canvas, labels, data, "bar", colorPalette[0]);
+                }
+            });
+
+            $("#operationChartModal").on("shown.bs.modal", function() {
+                if (!operationChartInstance) {
+                    const canvas = document.getElementById("operationChart");
+                    const labels = canvas.dataset.labels.split(",");
+                    const data = canvas.dataset.data.split(",").map(Number);
+                    operationChartInstance = createChart(canvas, labels, data, "bar", colorPalette[1]);
+                }
+            });
+
+            // Create chart function with professional config
+            function createChart(canvas, labels, data, type, primaryColor) {
+                const colors = type === "bar" ? data.map(() => primaryColor) : colorPalette.slice(0, data.length);
+                return new Chart(canvas, {
+                    type: type,
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: "Event Count",
+                            data: data,
+                            backgroundColor: colors,
+                            borderColor: colors.map(c => c.replace("0.8", "1")),
+                            borderWidth: 2,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: { duration: 1000, easing: "easeInOutQuart" },
+                        plugins: {
+                            legend: {
+                                display: type !== "bar",
+                                position: "top",
+                                onClick: (e, legendItem, legend) => {
+                                    const index = legendItem.index;
+                                    const chart = legend.chart;
+                                    const meta = chart.getDatasetMeta(0);
+                                    meta.data[index].hidden = !meta.data[index].hidden;
+                                    chart.update();
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || "";
+                                        const value = context.parsed.y || context.parsed;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return label + ": " + value.toLocaleString() + " (" + percentage + "%)";
+                                    }
+                                }
+                            }
+                        },
+                        scales: type === "bar" ? {
+                            y: { beginAtZero: true, ticks: { precision: 0 } }
+                        } : {}
+                    }
+                });
+            }
+
+            // Chart type switching
+            $(".chart-type-btn").on("click", function() {
+                const chartName = $(this).data("chart");
+                const newType = $(this).data("type");
+                const canvas = document.getElementById(chartName + "Chart");
+                const labels = canvas.dataset.labels.split(",");
+                const data = canvas.dataset.data.split(",").map(Number);
+                const primaryColor = chartName === "process" ? colorPalette[0] : colorPalette[1];
+
+                // Destroy existing chart
+                if (chartName === "process" && processChartInstance) {
+                    processChartInstance.destroy();
+                    processChartInstance = createChart(canvas, labels, data, newType, primaryColor);
+                } else if (chartName === "operation" && operationChartInstance) {
+                    operationChartInstance.destroy();
+                    operationChartInstance = createChart(canvas, labels, data, newType, primaryColor);
+                }
+
+                // Update button states
+                $(this).siblings().removeClass("active");
+                $(this).addClass("active");
+            });
+
+            // Download chart as PNG
+            $("#downloadProcessChart").on("click", function() {
+                if (processChartInstance) {
+                    const url = processChartInstance.toBase64Image();
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "process-chart-" + new Date().toISOString().split("T")[0] + ".png";
+                    a.click();
+                }
+            });
+
+            $("#downloadOperationChart").on("click", function() {
+                if (operationChartInstance) {
+                    const url = operationChartInstance.toBase64Image();
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "operation-chart-" + new Date().toISOString().split("T")[0] + ".png";
+                    a.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

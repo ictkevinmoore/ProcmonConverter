@@ -2301,4 +2301,3 @@ function loadTables() {
 
 # Note: Classes and functions are automatically available when dot-sourced
 # Export-ModuleMember is only for .psm1 module files, not dot-sourced scripts
-

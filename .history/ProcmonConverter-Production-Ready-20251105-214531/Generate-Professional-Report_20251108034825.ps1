@@ -320,19 +320,21 @@ function New-ProfessionalReport {
     }
 
     try {
-        # Prepare and validate data
+        Write-Verbose "Preparing report data..."
         $reportData = Prepare-ReportData -DataObject $DataObject -Config $config
         if (-not $reportData) {
             throw "Failed to prepare report data"
         }
+        Write-Verbose "Report data prepared successfully."
 
-        # Generate HTML content using modular approach
+        Write-Verbose "Generating HTML content..."
         $html = New-ReportHTML -ReportData $reportData -SessionInfo $SessionInfo -Config $config
+        Write-Verbose "HTML content generated successfully."
 
-        # Write to file with error handling
+        Write-Verbose "Writing HTML to file: $OutputPath"
         $html | Out-File -FilePath $OutputPath -Encoding UTF8 -Force -ErrorAction Stop
+        Write-Verbose "HTML written to file successfully."
 
-        # Validate output file
         if (-not (Test-Path $OutputPath)) {
             throw "Failed to create output file: $OutputPath"
         }
@@ -347,7 +349,7 @@ function New-ProfessionalReport {
         }
     }
     catch {
-        $errorMessage = "Report generation failed: $($_.Exception.Message)"
+        $errorMessage = "Report generation failed: $($_.Exception.Message) at $($_.InvocationInfo.ScriptLineNumber)"
         Write-Error $errorMessage
 
         return @{
@@ -945,27 +947,6 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('        :root[data-theme="dark"] .modal-header { border-bottom-color: var(--border-color); }') | Out-Null
         $htmlBuilder.AppendLine('        :root[data-theme="dark"] .modal-footer { border-top-color: var(--border-color); }') | Out-Null
         $htmlBuilder.AppendLine('        :root[data-theme="dark"] .btn-close { filter: invert(1); }') | Out-Null
-        $htmlBuilder.AppendLine('        /* Clickable Insights Styles */') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-clickable { cursor: pointer; transition: var(--transition-smooth); position: relative; }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-clickable:hover { background-color: rgba(102, 126, 234, 0.1); transform: translateX(5px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-clickable .insight-icon { margin-right: 0.5rem; opacity: 0.7; transition: opacity 0.2s; }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-clickable:hover .insight-icon { opacity: 1; }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-clickable .insight-text { font-weight: 500; }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-clickable .insight-arrow { margin-left: auto; transition: transform 0.2s; }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-clickable:hover .insight-arrow { transform: translateX(3px); }') | Out-Null
-        $htmlBuilder.AppendLine('        /* Insight Modal Styles */') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-modal .modal-dialog { max-width: 700px; }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-modal .modal-content { background: var(--modal-bg); color: var(--text-primary); }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-modal .modal-header { background: var(--primary-gradient); color: white; border-bottom: none; }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-modal .modal-body { padding: 2rem; }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-detail { margin-bottom: 1.5rem; }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-detail .insight-title { font-size: 1.25rem; font-weight: 600; color: var(--primary-solid); margin-bottom: 0.5rem; }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-detail .insight-description { font-size: 1rem; line-height: 1.6; color: var(--text-primary); }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-detail .insight-metrics { background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; margin-top: 1rem; }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-detail .metric-item { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-detail .metric-item:last-child { margin-bottom: 0; }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-detail .metric-label { font-weight: 500; color: var(--text-secondary); }') | Out-Null
-        $htmlBuilder.AppendLine('        .insight-detail .metric-value { font-weight: 600; color: var(--primary-solid); }') | Out-Null
         $htmlBuilder.AppendLine('    </style>') | Out-Null
 
         $htmlBuilder.AppendLine("</head>") | Out-Null
@@ -992,11 +973,16 @@ function New-ReportHTML {
         $htmlBuilder.AppendFormat('            <div class="col-md-3"><div class="metric-card"><div class="value">{0}</div><div class="label">Operation Types</div></div></div>', $ReportData.Summary.OperationTypes) | Out-Null
         $htmlBuilder.AppendLine('        </div>') | Out-Null
 
-        # PHASE 2: 6-TAB NAVIGATION STRUCTURE
-        $htmlBuilder.AppendLine('        <!-- 6-Tab Navigation Structure -->') | Out-Null
+        # PHASE 2: 6-TAB NAVIGATION STRUCTURE (Consolidated ML Analytics into Advanced Analytics)
+        $htmlBuilder.AppendLine('        <!-- 6-Tab Navigation Structure - Gold Standard -->') | Out-Null
         $htmlBuilder.AppendLine('        <ul class="nav nav-tabs" id="reportTabs" role="tablist">') | Out-Null
         $htmlBuilder.AppendLine('            <li class="nav-item" role="presentation">') | Out-Null
-        $htmlBuilder.AppendLine('                <button class="nav-link active" id="tab-summary-btn" data-bs-toggle="tab" data-bs-target="#tab-summary" type="button" role="tab">') | Out-Null
+        $htmlBuilder.AppendLine('                <button class="nav-link active" id="tab-detailed-btn" data-bs-toggle="tab" data-bs-target="#tab-detailed" type="button" role="tab">') | Out-Null
+        $htmlBuilder.AppendLine('                    <i class="fas fa-table-list me-2"></i>Detailed Analysis') | Out-Null
+        $htmlBuilder.AppendLine('                </button>') | Out-Null
+        $htmlBuilder.AppendLine('            </li>') | Out-Null
+        $htmlBuilder.AppendLine('            <li class="nav-item" role="presentation">') | Out-Null
+        $htmlBuilder.AppendLine('                <button class="nav-link" id="tab-summary-btn" data-bs-toggle="tab" data-bs-target="#tab-summary" type="button" role="tab">') | Out-Null
         $htmlBuilder.AppendLine('                    <i class="fas fa-briefcase me-2"></i>Executive Summary') | Out-Null
         $htmlBuilder.AppendLine('                </button>') | Out-Null
         $htmlBuilder.AppendLine('            </li>') | Out-Null
@@ -1008,11 +994,6 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('            <li class="nav-item" role="presentation">') | Out-Null
         $htmlBuilder.AppendLine('                <button class="nav-link" id="tab-analytics-btn" data-bs-toggle="tab" data-bs-target="#tab-analytics" type="button" role="tab">') | Out-Null
         $htmlBuilder.AppendLine('                    <i class="fas fa-chart-line me-2"></i>Advanced Analytics') | Out-Null
-        $htmlBuilder.AppendLine('                </button>') | Out-Null
-        $htmlBuilder.AppendLine('            </li>') | Out-Null
-        $htmlBuilder.AppendLine('            <li class="nav-item" role="presentation">') | Out-Null
-        $htmlBuilder.AppendLine('                <button class="nav-link" id="tab-ml-btn" data-bs-toggle="tab" data-bs-target="#tab-ml" type="button" role="tab">') | Out-Null
-        $htmlBuilder.AppendLine('                    <i class="fas fa-robot me-2"></i>ML Analytics') | Out-Null
         $htmlBuilder.AppendLine('                </button>') | Out-Null
         $htmlBuilder.AppendLine('            </li>') | Out-Null
         $htmlBuilder.AppendLine('            <li class="nav-item" role="presentation">') | Out-Null
@@ -1032,9 +1013,156 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('        <div class="tab-content mt-4" id="reportTabContent">') | Out-Null
         $htmlBuilder.AppendLine() | Out-Null
 
-        # TAB 1: EXECUTIVE SUMMARY
-        $htmlBuilder.AppendLine('            <!-- Tab 1: Executive Summary -->') | Out-Null
-        $htmlBuilder.AppendLine('            <div class="tab-pane fade show active" id="tab-summary" role="tabpanel">') | Out-Null
+        # TAB 1: DETAILED ANALYSIS (NEW UNIFIED TABLE)
+        $htmlBuilder.AppendLine('            <!-- Tab 1: Detailed Analysis - Unified Table -->') | Out-Null
+        $htmlBuilder.AppendLine('            <div class="tab-pane fade show active" id="tab-detailed" role="tabpanel">') | Out-Null
+        $htmlBuilder.AppendLine('                <div class="table-container">') | Out-Null
+        $htmlBuilder.AppendLine('                    <h3><i class="fas fa-table-list me-2"></i>Detailed Analysis - All Insights Combined</h3>') | Out-Null
+        $htmlBuilder.AppendLine('                    <p class="text-muted">Comprehensive view of all analytics including Executive Summary, Pattern Recognition, Advanced Analytics, and ML Predictions</p>') | Out-Null
+        $htmlBuilder.AppendLine('                    <table id="detailedAnalysisTable" class="table table-striped table-hover">') | Out-Null
+        $htmlBuilder.AppendLine('                        <thead>') | Out-Null
+        $htmlBuilder.AppendLine('                            <tr>') | Out-Null
+        $htmlBuilder.AppendLine('                                <th>Category</th>') | Out-Null
+        $htmlBuilder.AppendLine('                                <th>Type</th>') | Out-Null
+        $htmlBuilder.AppendLine('                                <th>Description</th>') | Out-Null
+        $htmlBuilder.AppendLine('                                <th>Severity/Score</th>') | Out-Null
+        $htmlBuilder.AppendLine('                                <th>Details</th>') | Out-Null
+        $htmlBuilder.AppendLine('                            </tr>') | Out-Null
+        $htmlBuilder.AppendLine('                        </thead>') | Out-Null
+        $htmlBuilder.AppendLine('                        <tbody>') | Out-Null
+
+        # Build unified data rows
+        # 1. Executive Summary - Health Score
+        $htmlBuilder.AppendLine('                            <tr>') | Out-Null
+        $htmlBuilder.AppendLine('                                <td><i class="fas fa-briefcase text-primary me-2"></i>Executive Summary</td>') | Out-Null
+        $htmlBuilder.AppendLine('                                <td>Health Score</td>') | Out-Null
+        $htmlBuilder.AppendFormat('                                <td>Overall system health assessment based on comprehensive analysis</td>') | Out-Null
+        $htmlBuilder.AppendFormat('                                <td><span class="badge bg-success">{0:N1}/100</span></td>', $analytics.HealthScore) | Out-Null
+        $htmlBuilder.AppendFormat('                                <td>Calculated from {0} metrics including error rates, anomalies, and patterns</td>', $analytics.Metrics.TotalEvents) | Out-Null
+        $htmlBuilder.AppendLine('                            </tr>') | Out-Null
+
+        # 2. Executive Summary - Insights
+        foreach ($insight in $analytics.Insights) {
+            $htmlBuilder.AppendLine('                            <tr>') | Out-Null
+            $htmlBuilder.AppendLine('                                <td><i class="fas fa-briefcase text-primary me-2"></i>Executive Summary</td>') | Out-Null
+            $htmlBuilder.AppendLine('                                <td>Key Insight</td>') | Out-Null
+            $htmlBuilder.AppendFormat('                                <td>{0}</td>', [System.Web.HttpUtility]::HtmlEncode($insight)) | Out-Null
+            $htmlBuilder.AppendLine('                                <td><span class="badge bg-info">Informational</span></td>') | Out-Null
+            $htmlBuilder.AppendLine('                                <td>Derived from statistical analysis of system behavior</td>') | Out-Null
+            $htmlBuilder.AppendLine('                            </tr>') | Out-Null
+        }
+
+        # 3. Executive Summary - Recommendations
+        foreach ($recommendation in $analytics.Recommendations) {
+            $htmlBuilder.AppendLine('                            <tr>') | Out-Null
+            $htmlBuilder.AppendLine('                                <td><i class="fas fa-briefcase text-primary me-2"></i>Executive Summary</td>') | Out-Null
+            $htmlBuilder.AppendLine('                                <td>Recommendation</td>') | Out-Null
+            $htmlBuilder.AppendFormat('                                <td>{0}</td>', [System.Web.HttpUtility]::HtmlEncode($recommendation)) | Out-Null
+            $htmlBuilder.AppendLine('                                <td><span class="badge bg-warning">Action Required</span></td>') | Out-Null
+            $htmlBuilder.AppendLine('                                <td>Expert system recommendation for optimization</td>') | Out-Null
+            $htmlBuilder.AppendLine('                            </tr>') | Out-Null
+        }
+
+        # 4. Pattern Recognition - Detected Patterns
+        foreach ($pattern in $patterns.DetectedPatterns) {
+            $badgeClass = switch ($pattern.Severity) {
+                'High' { 'danger' }
+                'Medium' { 'warning' }
+                default { 'info' }
+            }
+            $htmlBuilder.AppendLine('                            <tr>') | Out-Null
+            $htmlBuilder.AppendLine('                                <td><i class="fas fa-brain text-success me-2"></i>Pattern Recognition</td>') | Out-Null
+            $htmlBuilder.AppendFormat('                                <td>{0}</td>', [System.Web.HttpUtility]::HtmlEncode($pattern.Type)) | Out-Null
+            $htmlBuilder.AppendFormat('                                <td>{0}</td>', [System.Web.HttpUtility]::HtmlEncode($pattern.Description)) | Out-Null
+            $htmlBuilder.AppendFormat('                                <td><span class="badge bg-{0}">{1}</span></td>', $badgeClass, $pattern.Severity) | Out-Null
+            $htmlBuilder.AppendLine('                                <td>Machine learning pattern detection result</td>') | Out-Null
+            $htmlBuilder.AppendLine('                            </tr>') | Out-Null
+        }
+
+        # 5. Pattern Recognition - Process Clusters
+        foreach ($cluster in $patterns.ProcessClusters) {
+            $htmlBuilder.AppendLine('                            <tr>') | Out-Null
+            $htmlBuilder.AppendLine('                                <td><i class="fas fa-brain text-success me-2"></i>Pattern Recognition</td>') | Out-Null
+            $htmlBuilder.AppendLine('                                <td>Process Cluster</td>') | Out-Null
+            $htmlBuilder.AppendFormat('                                <td>{0} Activity Cluster with {1} processes</td>', $cluster.Characteristics.Category, $cluster.Processes.Count) | Out-Null
+            $htmlBuilder.AppendLine('                                <td><span class="badge bg-secondary">Cluster</span></td>') | Out-Null
+            $htmlBuilder.AppendFormat('                                <td>Processes: {0}</td>', ($cluster.Processes -join ', ')) | Out-Null
+            $htmlBuilder.AppendLine('                            </tr>') | Out-Null
+        }
+
+        # 6. Advanced Analytics - Metrics
+        $htmlBuilder.AppendLine('                            <tr>') | Out-Null
+        $htmlBuilder.AppendLine('                                <td><i class="fas fa-chart-line text-warning me-2"></i>Advanced Analytics</td>') | Out-Null
+        $htmlBuilder.AppendLine('                                <td>Total Events</td>') | Out-Null
+        $htmlBuilder.AppendFormat('                                <td>Total number of events processed in analysis session</td>') | Out-Null
+        $htmlBuilder.AppendFormat('                                <td><span class="badge bg-primary">{0:N0}</span></td>', $analytics.Metrics.TotalEvents) | Out-Null
+        $htmlBuilder.AppendLine('                                <td>Base metric for all calculations</td>') | Out-Null
+        $htmlBuilder.AppendLine('                            </tr>') | Out-Null
+
+        $htmlBuilder.AppendLine('                            <tr>') | Out-Null
+        $htmlBuilder.AppendLine('                                <td><i class="fas fa-chart-line text-warning me-2"></i>Advanced Analytics</td>') | Out-Null
+        $htmlBuilder.AppendLine('                                <td>Error Rate</td>') | Out-Null
+        $htmlBuilder.AppendFormat('                                <td>Percentage of failed operations in the dataset</td>') | Out-Null
+        $htmlBuilder.AppendFormat('                                <td><span class="badge bg-danger">{0:P2}</span></td>', $analytics.Metrics.ErrorRate) | Out-Null
+        $htmlBuilder.AppendLine('                                <td>Critical metric for system stability assessment</td>') | Out-Null
+        $htmlBuilder.AppendLine('                            </tr>') | Out-Null
+
+        $htmlBuilder.AppendLine('                            <tr>') | Out-Null
+        $htmlBuilder.AppendLine('                                <td><i class="fas fa-chart-line text-warning me-2"></i>Advanced Analytics</td>') | Out-Null
+        $htmlBuilder.AppendLine('                                <td>Anomalies Detected</td>') | Out-Null
+        $htmlBuilder.AppendFormat('                                <td>Number of statistical anomalies identified through advanced analytics</td>') | Out-Null
+        $htmlBuilder.AppendFormat('                                <td><span class="badge bg-warning">{0}</span></td>', $analytics.Anomalies.Count) | Out-Null
+        $htmlBuilder.AppendLine('                                <td>Anomalies indicate unusual system behavior requiring attention</td>') | Out-Null
+        $htmlBuilder.AppendLine('                            </tr>') | Out-Null
+
+        # 7. Advanced Analytics - Anomaly Items
+        if ($analytics.Anomalies.Count -gt 0) {
+            foreach ($anomaly in $analytics.Anomalies.Items) {
+                $htmlBuilder.AppendLine('                            <tr>') | Out-Null
+                $htmlBuilder.AppendLine('                                <td><i class="fas fa-chart-line text-warning me-2"></i>Advanced Analytics</td>') | Out-Null
+                $htmlBuilder.AppendLine('                                <td>Anomaly Detail</td>') | Out-Null
+                $htmlBuilder.AppendFormat('                                <td>{0}</td>', [System.Web.HttpUtility]::HtmlEncode($anomaly)) | Out-Null
+                $htmlBuilder.AppendLine('                                <td><span class="badge bg-danger">Anomaly</span></td>') | Out-Null
+                $htmlBuilder.AppendLine('                                <td>Statistical outlier detected by ML algorithms</td>') | Out-Null
+                $htmlBuilder.AppendLine('                            </tr>') | Out-Null
+            }
+        }
+
+        # 8. Risk Assessment
+        $htmlBuilder.AppendLine('                            <tr>') | Out-Null
+        $htmlBuilder.AppendLine('                                <td><i class="fas fa-chart-line text-warning me-2"></i>Advanced Analytics</td>') | Out-Null
+        $htmlBuilder.AppendLine('                                <td>Risk Assessment</td>') | Out-Null
+        $htmlBuilder.AppendFormat('                                <td>Overall system risk level based on comprehensive analysis</td>') | Out-Null
+        $htmlBuilder.AppendFormat('                                <td><span class="badge bg-danger">{0}</span></td>', $analytics.RiskAssessment.Level) | Out-Null
+        $htmlBuilder.AppendFormat('                                <td>Risk Score: {0}/100 - Requires immediate attention if High</td>', $analytics.RiskAssessment.Total) | Out-Null
+        $htmlBuilder.AppendLine('                            </tr>') | Out-Null
+
+        # 9. ML Analytics - Temporal Analysis
+        $htmlBuilder.AppendLine('                            <tr>') | Out-Null
+        $htmlBuilder.AppendLine('                                <td><i class="fas fa-robot text-info me-2"></i>ML Analytics</td>') | Out-Null
+        $htmlBuilder.AppendLine('                                <td>Temporal Trend</td>') | Out-Null
+        $htmlBuilder.AppendFormat('                                <td>Time-series analysis showing {0} trend direction</td>', $patterns.TemporalPatterns.TrendDirection) | Out-Null
+        $htmlBuilder.AppendLine('                                <td><span class="badge bg-primary">Trend</span></td>') | Out-Null
+        $htmlBuilder.AppendFormat('                                <td>Seasonality: {0} - ML prediction of future behavior</td>', $patterns.TemporalPatterns.Seasonality) | Out-Null
+        $htmlBuilder.AppendLine('                            </tr>') | Out-Null
+
+        $htmlBuilder.AppendLine('                            <tr>') | Out-Null
+        $htmlBuilder.AppendLine('                                <td><i class="fas fa-robot text-info me-2"></i>ML Analytics</td>') | Out-Null
+        $htmlBuilder.AppendLine('                                <td>Seasonality Pattern</td>') | Out-Null
+        $htmlBuilder.AppendFormat('                                <td>Machine learning detected seasonality: {0}</td>', $patterns.TemporalPatterns.Seasonality) | Out-Null
+        $htmlBuilder.AppendLine('                                <td><span class="badge bg-info">Pattern</span></td>') | Out-Null
+        $htmlBuilder.AppendLine('                                <td>Recurring patterns identified through time-series analysis</td>') | Out-Null
+        $htmlBuilder.AppendLine('                            </tr>') | Out-Null
+
+        $htmlBuilder.AppendLine('                        </tbody>') | Out-Null
+        $htmlBuilder.AppendLine('                    </table>') | Out-Null
+        $htmlBuilder.AppendLine('                </div>') | Out-Null
+        $htmlBuilder.AppendLine('            </div>') | Out-Null
+        $htmlBuilder.AppendLine() | Out-Null
+
+        # TAB 2: EXECUTIVE SUMMARY (was Tab 1)
+        $htmlBuilder.AppendLine('            <!-- Tab 2: Executive Summary -->') | Out-Null
+        $htmlBuilder.AppendLine('            <div class="tab-pane fade" id="tab-summary" role="tabpanel">') | Out-Null
         $htmlBuilder.AppendLine('                <div class="row g-4">') | Out-Null
         $htmlBuilder.AppendLine('                    <div class="col-md-12">') | Out-Null
         $htmlBuilder.AppendLine('                        <div class="table-container">') | Out-Null
@@ -1043,7 +1171,7 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('                            <h5 class="mt-4">Key Insights</h5>') | Out-Null
         $htmlBuilder.AppendLine('                            <ul class="list-group">') | Out-Null
         foreach ($insight in $analytics.Insights) {
-            $htmlBuilder.AppendFormat('                                <li class="list-group-item insight-clickable" data-insight-type="executive" data-insight-id="{0}"><i class="fas fa-lightbulb insight-icon"></i><span class="insight-text">{1}</span><i class="fas fa-chevron-right insight-arrow"></i></li>', [System.Web.HttpUtility]::HtmlEncode($insight).GetHashCode(), [System.Web.HttpUtility]::HtmlEncode($insight)) | Out-Null
+            $htmlBuilder.AppendFormat('                                <li class="list-group-item">{0}</li>', [System.Web.HttpUtility]::HtmlEncode($insight)) | Out-Null
         }
         $htmlBuilder.AppendLine('                            </ul>') | Out-Null
         $htmlBuilder.AppendLine('                            <h5 class="mt-4">Recommendations</h5>') | Out-Null
@@ -1128,40 +1256,9 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('            </div>') | Out-Null
         $htmlBuilder.AppendLine() | Out-Null
 
-        # TAB 4: ML ANALYTICS
-        $htmlBuilder.AppendLine('            <!-- Tab 4: ML Analytics -->') | Out-Null
-        $htmlBuilder.AppendLine('            <div class="tab-pane fade" id="tab-ml" role="tabpanel">') | Out-Null
-        $htmlBuilder.AppendLine('                <div class="row g-4">') | Out-Null
-        $htmlBuilder.AppendLine('                    <div class="col-md-12">') | Out-Null
-        $htmlBuilder.AppendLine('                        <div class="table-container">') | Out-Null
-        $htmlBuilder.AppendLine('                            <h3><i class="fas fa-robot me-2"></i>Machine Learning Analytics</h3>') | Out-Null
-        $htmlBuilder.AppendLine('                            <p class="lead">Combined ML/AI insights from pattern recognition and advanced analytics engines</p>') | Out-Null
-        $htmlBuilder.AppendLine('                            <h5 class="mt-4">ML Predictions & Insights</h5>') | Out-Null
-        $htmlBuilder.AppendLine('                            <div class="row">') | Out-Null
-        $htmlBuilder.AppendLine('                                <div class="col-md-6">') | Out-Null
-        $htmlBuilder.AppendLine('                                    <div class="alert alert-primary">') | Out-Null
-        $htmlBuilder.AppendLine('                                        <h6>Temporal Analysis</h6>') | Out-Null
-        $htmlBuilder.AppendFormat('                                        <p><strong>Trend:</strong> {0}</p>', $patterns.TemporalPatterns.TrendDirection) | Out-Null
-        $htmlBuilder.AppendFormat('                                        <p><strong>Seasonality:</strong> {0}</p>', $patterns.TemporalPatterns.Seasonality) | Out-Null
-        $htmlBuilder.AppendLine('                                    </div>') | Out-Null
-        $htmlBuilder.AppendLine('                                </div>') | Out-Null
-        $htmlBuilder.AppendLine('                                <div class="col-md-6">') | Out-Null
-        $htmlBuilder.AppendLine('                                    <div class="alert alert-success">') | Out-Null
-        $htmlBuilder.AppendLine('                                        <h6>Risk Assessment</h6>') | Out-Null
-        $htmlBuilder.AppendFormat('                                        <p><strong>Overall Risk:</strong> {0}</p>', $analytics.RiskAssessment.Level) | Out-Null
-        $htmlBuilder.AppendFormat('                                        <p><strong>Risk Score:</strong> {0}/100</p>', $analytics.RiskAssessment.Total) | Out-Null
-        $htmlBuilder.AppendLine('                                    </div>') | Out-Null
-        $htmlBuilder.AppendLine('                                </div>') | Out-Null
-        $htmlBuilder.AppendLine('                            </div>') | Out-Null
-        $htmlBuilder.AppendLine('                        </div>') | Out-Null
-        $htmlBuilder.AppendLine('                    </div>') | Out-Null
-        $htmlBuilder.AppendLine('                </div>') | Out-Null
-        $htmlBuilder.AppendLine('            </div>') | Out-Null
-        $htmlBuilder.AppendLine() | Out-Null
-
-        # TAB 5: EVENT DETAILS TABLE
-        $htmlBuilder.AppendLine('            <!-- Tab 5: Event Details -->') | Out-Null
-        $htmlBuilder.AppendLine('            <div class="tab-pane fade" id="tab-events" role="tabpanel">') | Out-Null
+        # TAB 4: EVENT DETAILS TABLE (with lazy loading)
+        $htmlBuilder.AppendLine('            <!-- Tab 4: Event Details -->') | Out-Null
+        $htmlBuilder.AppendLine('            <div class="tab-pane fade lazy-load" id="tab-events" role="tabpanel" data-lazy="tables">') | Out-Null
         $htmlBuilder.AppendLine('                <div class="table-container">') | Out-Null
         $htmlBuilder.AppendFormat('            <h4>Event Details (Showing first {0} records)</h4>', $ReportData.SampleEvents.Count) | Out-Null
         $htmlBuilder.AppendLine('            <table class="table table-striped">') | Out-Null
@@ -1195,9 +1292,9 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('            </div>') | Out-Null
         $htmlBuilder.AppendLine() | Out-Null
 
-        # TAB 6: CHARTS
-        $htmlBuilder.AppendLine('            <!-- Tab 6: Charts -->') | Out-Null
-        $htmlBuilder.AppendLine('            <div class="tab-pane fade" id="tab-charts" role="tabpanel">') | Out-Null
+        # TAB 5: CHARTS (with lazy loading)
+        $htmlBuilder.AppendLine('            <!-- Tab 5: Charts -->') | Out-Null
+        $htmlBuilder.AppendLine('            <div class="tab-pane fade lazy-load" id="tab-charts" role="tabpanel" data-lazy="charts">') | Out-Null
         $htmlBuilder.AppendLine('                <div class="chart-container">') | Out-Null
         $htmlBuilder.AppendLine('                    <h3 class="mb-3"><i class="fas fa-chart-bar me-2"></i>Data Visualizations</h3>') | Out-Null
         $htmlBuilder.AppendLine('                    <div class="chart-thumbnail-container">') | Out-Null
@@ -1317,7 +1414,198 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('    <!-- Dynamic Chart Enhancement -->') | Out-Null
         $htmlBuilder.AppendLine('    <script src="./Add-DynamicChartScript.js"></script>') | Out-Null
         $htmlBuilder.AppendLine('    <script>') | Out-Null
+        $htmlBuilder.AppendLine('        // Lazy Loading Observer for Performance Optimization') | Out-Null
+        $htmlBuilder.AppendLine('        let chartsLoaded = false;') | Out-Null
+        $htmlBuilder.AppendLine('        let tablesLoaded = false;') | Out-Null
+        $htmlBuilder.AppendLine('        let dataTableInstance = null;') | Out-Null
+        $htmlBuilder.AppendLine() | Out-Null
+        $htmlBuilder.AppendLine('        const lazyLoadObserver = new IntersectionObserver((entries) => {') | Out-Null
+        $htmlBuilder.AppendLine('            entries.forEach(entry => {') | Out-Null
+        $htmlBuilder.AppendLine('                if (entry.isIntersecting) {') | Out-Null
+        $htmlBuilder.AppendLine('                    const element = entry.target;') | Out-Null
+        $htmlBuilder.AppendLine('                    const lazyType = element.dataset.lazy;') | Out-Null
+        $htmlBuilder.AppendLine() | Out-Null
+        $htmlBuilder.AppendLine('                    if (lazyType === "charts" && !chartsLoaded) {') | Out-Null
+        $htmlBuilder.AppendLine('                        loadChartThumbnails();') | Out-Null
+        $htmlBuilder.AppendLine('                        chartsLoaded = true;') | Out-Null
+        $htmlBuilder.AppendLine('                    } else if (lazyType === "tables" && !tablesLoaded) {') | Out-Null
+        $htmlBuilder.AppendLine('                        loadDataTable();') | Out-Null
+        $htmlBuilder.AppendLine('                        tablesLoaded = true;') | Out-Null
+        $htmlBuilder.AppendLine('                    }') | Out-Null
+        $htmlBuilder.AppendLine() | Out-Null
+        $htmlBuilder.AppendLine('                    lazyLoadObserver.unobserve(element);') | Out-Null
+        $htmlBuilder.AppendLine('                }') | Out-Null
+        $htmlBuilder.AppendLine('            });') | Out-Null
+        $htmlBuilder.AppendLine('        }, { rootMargin: "50px" });') | Out-Null
+        $htmlBuilder.AppendLine() | Out-Null
         $htmlBuilder.AppendLine('        $(document).ready(function() {') | Out-Null
+        $htmlBuilder.AppendLine('            // Initialize Detailed Analysis Table immediately') | Out-Null
+        $htmlBuilder.AppendLine('            const detailedAnalysisTable = $("#detailedAnalysisTable").DataTable({') | Out-Null
+        $htmlBuilder.AppendLine('                pageLength: 25,') | Out-Null
+        $htmlBuilder.AppendLine('                lengthMenu: [[10, 25, 50, 100, -1], ["10 rows", "25 rows", "50 rows", "100 rows", "Show all"]],') | Out-Null
+        $htmlBuilder.AppendLine('                order: [[0, "asc"]],') | Out-Null
+        $htmlBuilder.AppendLine('                responsive: true,') | Out-Null
+        $htmlBuilder.AppendLine('                dom: "<\"row mb-3\"<\"col-sm-12 col-md-6\"l><\"col-sm-12 col-md-6 text-end\"B>>" +') | Out-Null
+        $htmlBuilder.AppendLine('                     "<\"row\"<\"col-sm-12 col-md-6\"f><\"col-sm-12 col-md-6 text-end\"<\"clear-filters-detailed\">>>" +') | Out-Null
+        $htmlBuilder.AppendLine('                     "<\"row\"<\"col-sm-12\"tr>>" +') | Out-Null
+        $htmlBuilder.AppendLine('                     "<\"row\"<\"col-sm-12 col-md-5\"i><\"col-sm-12 col-md-7\"p>>",') | Out-Null
+        $htmlBuilder.AppendLine('                buttons: [') | Out-Null
+        $htmlBuilder.AppendLine('                    {') | Out-Null
+        $htmlBuilder.AppendLine('                        extend: "excel",') | Out-Null
+        $htmlBuilder.AppendLine('                        text: "<i class=\"fas fa-file-excel\"></i> Excel",') | Out-Null
+        $htmlBuilder.AppendLine('                        className: "btn btn-success btn-sm me-1",') | Out-Null
+        $htmlBuilder.AppendLine('                        title: "Detailed Analysis - " + new Date().toISOString().split("T")[0]') | Out-Null
+        $htmlBuilder.AppendLine('                    },') | Out-Null
+        $htmlBuilder.AppendLine('                    {') | Out-Null
+        $htmlBuilder.AppendLine('                        extend: "csv",') | Out-Null
+        $htmlBuilder.AppendLine('                        text: "<i class=\"fas fa-file-csv\"></i> CSV",') | Out-Null
+        $htmlBuilder.AppendLine('                        className: "btn btn-info btn-sm me-1",') | Out-Null
+        $htmlBuilder.AppendLine('                        title: "Detailed Analysis - " + new Date().toISOString().split("T")[0]') | Out-Null
+        $htmlBuilder.AppendLine('                    },') | Out-Null
+        $htmlBuilder.AppendLine('                    {') | Out-Null
+        $htmlBuilder.AppendLine('                        extend: "pdf",') | Out-Null
+        $htmlBuilder.AppendLine('                        text: "<i class=\"fas fa-file-pdf\"></i> PDF",') | Out-Null
+        $htmlBuilder.AppendLine('                        className: "btn btn-danger btn-sm me-1",') | Out-Null
+        $htmlBuilder.AppendLine('                        title: "Detailed Analysis",') | Out-Null
+        $htmlBuilder.AppendLine('                        orientation: "landscape",') | Out-Null
+        $htmlBuilder.AppendLine('                        pageSize: "LEGAL"') | Out-Null
+        $htmlBuilder.AppendLine('                    },') | Out-Null
+        $htmlBuilder.AppendLine('                    {') | Out-Null
+        $htmlBuilder.AppendLine('                        extend: "copy",') | Out-Null
+        $htmlBuilder.AppendLine('                        text: "<i class=\"fas fa-copy\"></i> Copy",') | Out-Null
+        $htmlBuilder.AppendLine('                        className: "btn btn-secondary btn-sm me-1"') | Out-Null
+        $htmlBuilder.AppendLine('                    },') | Out-Null
+        $htmlBuilder.AppendLine('                    {') | Out-Null
+        $htmlBuilder.AppendLine('                        extend: "print",') | Out-Null
+        $htmlBuilder.AppendLine('                        text: "<i class=\"fas fa-print\"></i> Print",') | Out-Null
+        $htmlBuilder.AppendLine('                        className: "btn btn-dark btn-sm"') | Out-Null
+        $htmlBuilder.AppendLine('                    }') | Out-Null
+        $htmlBuilder.AppendLine('                ],') | Out-Null
+        $htmlBuilder.AppendLine('                initComplete: function() {') | Out-Null
+        $htmlBuilder.AppendLine('                    // Add column-specific checkbox filters for Category, Type, and Severity') | Out-Null
+        $htmlBuilder.AppendLine('                    this.api().columns([0, 1, 3]).every(function(colIdx) {') | Out-Null
+        $htmlBuilder.AppendLine('                        const column = this;') | Out-Null
+        $htmlBuilder.AppendLine('                        const title = $(column.header()).text();') | Out-Null
+        $htmlBuilder.AppendLine('                        ') | Out-Null
+        $htmlBuilder.AppendLine('                        const filterContainer = $("<div style=\"position: relative;\"></div>").appendTo($(column.header()).empty());') | Out-Null
+        $htmlBuilder.AppendLine('                        const filterBtn = $("<button class=\"column-filter-btn\" type=\"button\">" +') | Out-Null
+        $htmlBuilder.AppendLine('                            "<span class=\"filter-text\">" + title + "</span>" +') | Out-Null
+        $htmlBuilder.AppendLine('                            "<i class=\"fas fa-chevron-down\"></i>" +') | Out-Null
+        $htmlBuilder.AppendLine('                            "</button>").appendTo(filterContainer);') | Out-Null
+        $htmlBuilder.AppendLine('                        ') | Out-Null
+        $htmlBuilder.AppendLine('                        const dropdown = $("<div class=\"column-filter-dropdown\"></div>").appendTo(filterContainer);') | Out-Null
+        $htmlBuilder.AppendLine('                        const searchBox = $("<div class=\"filter-search\"><input type=\"text\" placeholder=\"Search...\" class=\"filter-search-input\"></div>").appendTo(dropdown);') | Out-Null
+        $htmlBuilder.AppendLine('                        const optionsContainer = $("<div class=\"filter-options\"></div>").appendTo(dropdown);') | Out-Null
+        $htmlBuilder.AppendLine('                        ') | Out-Null
+        $htmlBuilder.AppendLine('                        const uniqueValues = [];') | Out-Null
+        $htmlBuilder.AppendLine('                        column.data().unique().sort().each(function(d) {') | Out-Null
+        $htmlBuilder.AppendLine('                            const textContent = $("<div>" + d + "</div>").text();') | Out-Null
+        $htmlBuilder.AppendLine('                            if (textContent) uniqueValues.push(textContent);') | Out-Null
+        $htmlBuilder.AppendLine('                        });') | Out-Null
+        $htmlBuilder.AppendLine('                        ') | Out-Null
+        $htmlBuilder.AppendLine('                        uniqueValues.forEach(function(value) {') | Out-Null
+        $htmlBuilder.AppendLine('                            const optionId = "filter_detailed_" + colIdx + "_" + value.replace(/[^a-zA-Z0-9]/g, "_");') | Out-Null
+        $htmlBuilder.AppendLine('                            const option = $("<div class=\"filter-option\">" +') | Out-Null
+        $htmlBuilder.AppendLine('                                "<input type=\"checkbox\" id=\"" + optionId + "\" value=\"" + value + "\" checked>" +') | Out-Null
+        $htmlBuilder.AppendLine('                                "<label for=\"" + optionId + "\">" + value + "</label>" +') | Out-Null
+        $htmlBuilder.AppendLine('                                "</div>");') | Out-Null
+        $htmlBuilder.AppendLine('                            optionsContainer.append(option);') | Out-Null
+        $htmlBuilder.AppendLine('                        });') | Out-Null
+        $htmlBuilder.AppendLine('                        ') | Out-Null
+        $htmlBuilder.AppendLine('                        const actions = $("<div class=\"filter-actions\">" +') | Out-Null
+        $htmlBuilder.AppendLine('                            "<button class=\"select-all-btn\">Select All</button>" +') | Out-Null
+        $htmlBuilder.AppendLine('                            "<button class=\"clear-btn\">Clear</button>" +') | Out-Null
+        $htmlBuilder.AppendLine('                            "</div>").appendTo(dropdown);') | Out-Null
+        $htmlBuilder.AppendLine('                        ') | Out-Null
+        $htmlBuilder.AppendLine('                        filterBtn.on("click", function(e) {') | Out-Null
+        $htmlBuilder.AppendLine('                            e.stopPropagation();') | Out-Null
+        $htmlBuilder.AppendLine('                            $(".column-filter-dropdown").not(dropdown).removeClass("show");') | Out-Null
+        $htmlBuilder.AppendLine('                            dropdown.toggleClass("show");') | Out-Null
+        $htmlBuilder.AppendLine('                        });') | Out-Null
+        $htmlBuilder.AppendLine('                        ') | Out-Null
+        $htmlBuilder.AppendLine('                        searchBox.find("input").on("keyup", function() {') | Out-Null
+        $htmlBuilder.AppendLine('                            const searchTerm = $(this).val().toLowerCase();') | Out-Null
+        $htmlBuilder.AppendLine('                            optionsContainer.find(".filter-option").each(function() {') | Out-Null
+        $htmlBuilder.AppendLine('                                const text = $(this).find("label").text().toLowerCase();') | Out-Null
+        $htmlBuilder.AppendLine('                                $(this).toggle(text.indexOf(searchTerm) > -1);') | Out-Null
+        $htmlBuilder.AppendLine('                            });') | Out-Null
+        $htmlBuilder.AppendLine('                        });') | Out-Null
+        $htmlBuilder.AppendLine('                        ') | Out-Null
+        $htmlBuilder.AppendLine('                        optionsContainer.on("change", "input[type=\"checkbox\"]", function() {') | Out-Null
+        $htmlBuilder.AppendLine('                            const selectedValues = [];') | Out-Null
+        $htmlBuilder.AppendLine('                            optionsContainer.find("input[type=\"checkbox\"]:checked").each(function() {') | Out-Null
+        $htmlBuilder.AppendLine('                                selectedValues.push($.fn.dataTable.util.escapeRegex($(this).val()));') | Out-Null
+        $htmlBuilder.AppendLine('                            });') | Out-Null
+        $htmlBuilder.AppendLine('                            ') | Out-Null
+        $htmlBuilder.AppendLine('                            if (selectedValues.length === uniqueValues.length || selectedValues.length === 0) {') | Out-Null
+        $htmlBuilder.AppendLine('                                column.search("").draw();') | Out-Null
+        $htmlBuilder.AppendLine('                            } else {') | Out-Null
+        $htmlBuilder.AppendLine('                                column.search(selectedValues.join("|"), true, false).draw();') | Out-Null
+        $htmlBuilder.AppendLine('                            }') | Out-Null
+        $htmlBuilder.AppendLine('                            ') | Out-Null
+        $htmlBuilder.AppendLine('                            const checkedCount = optionsContainer.find("input[type=\"checkbox\"]:checked").length;') | Out-Null
+        $htmlBuilder.AppendLine('                            if (checkedCount < uniqueValues.length) {') | Out-Null
+        $htmlBuilder.AppendLine('                                filterBtn.find(".filter-text").html(title + " <span class=\"filter-count\">" + checkedCount + "</span>");') | Out-Null
+        $htmlBuilder.AppendLine('                            } else {') | Out-Null
+        $htmlBuilder.AppendLine('                                filterBtn.find(".filter-text").text(title);') | Out-Null
+        $htmlBuilder.AppendLine('                            }') | Out-Null
+        $htmlBuilder.AppendLine('                        });') | Out-Null
+        $htmlBuilder.AppendLine('                        ') | Out-Null
+        $htmlBuilder.AppendLine('                        actions.find(".select-all-btn").on("click", function(e) {') | Out-Null
+        $htmlBuilder.AppendLine('                            e.stopPropagation();') | Out-Null
+        $htmlBuilder.AppendLine('                            optionsContainer.find("input[type=\"checkbox\"]").prop("checked", true).first().trigger("change");') | Out-Null
+        $htmlBuilder.AppendLine('                        });') | Out-Null
+        $htmlBuilder.AppendLine('                        ') | Out-Null
+        $htmlBuilder.AppendLine('                        actions.find(".clear-btn").on("click", function(e) {') | Out-Null
+        $htmlBuilder.AppendLine('                            e.stopPropagation();') | Out-Null
+        $htmlBuilder.AppendLine('                            optionsContainer.find("input[type=\"checkbox\"]").prop("checked", false).first().trigger("change");') | Out-Null
+        $htmlBuilder.AppendLine('                        });') | Out-Null
+        $htmlBuilder.AppendLine('                    });') | Out-Null
+        $htmlBuilder.AppendLine('                    ') | Out-Null
+        $htmlBuilder.AppendLine('                    $(document).on("click", function() {') | Out-Null
+        $htmlBuilder.AppendLine('                        $(".column-filter-dropdown").removeClass("show");') | Out-Null
+        $htmlBuilder.AppendLine('                    });') | Out-Null
+        $htmlBuilder.AppendLine('                    ') | Out-Null
+        $htmlBuilder.AppendLine('                    $("div.clear-filters-detailed").html("<button id=\"clearFiltersDetailedBtn\" class=\"btn btn-warning btn-sm\"><i class=\"fas fa-eraser\"></i> Clear All Filters</button>");') | Out-Null
+        $htmlBuilder.AppendLine('                }') | Out-Null
+        $htmlBuilder.AppendLine('            });') | Out-Null
+        $htmlBuilder.AppendLine() | Out-Null
+        $htmlBuilder.AppendLine('            // Clear all filters for Detailed Analysis table') | Out-Null
+        $htmlBuilder.AppendLine('            $(document).on("click", "#clearFiltersDetailedBtn", function() {') | Out-Null
+        $htmlBuilder.AppendLine('                detailedAnalysisTable.columns([0, 1, 3]).every(function() {') | Out-Null
+        $htmlBuilder.AppendLine('                    const header = $(this.header());') | Out-Null
+        $htmlBuilder.AppendLine('                    header.find("input[type=\"checkbox\"]").prop("checked", true);') | Out-Null
+        $htmlBuilder.AppendLine('                    this.search("");') | Out-Null
+        $htmlBuilder.AppendLine('                    const title = header.find(".filter-text").text().split(" ")[0];') | Out-Null
+        $htmlBuilder.AppendLine('                    header.find(".filter-text").text(title);') | Out-Null
+        $htmlBuilder.AppendLine('                });') | Out-Null
+        $htmlBuilder.AppendLine('                detailedAnalysisTable.search("").draw();') | Out-Null
+        $htmlBuilder.AppendLine('            });') | Out-Null
+        $htmlBuilder.AppendLine() | Out-Null
+        $htmlBuilder.AppendLine('            // Row click handler for Detailed Analysis table') | Out-Null
+        $htmlBuilder.AppendLine('            $("#detailedAnalysisTable tbody").on("click", "tr", function() {') | Out-Null
+        $htmlBuilder.AppendLine('                const rowData = detailedAnalysisTable.row(this).data();') | Out-Null
+        $htmlBuilder.AppendLine('                if (rowData) {') | Out-Null
+        $htmlBuilder.AppendLine('                    let detailHtml = "";') | Out-Null
+        $htmlBuilder.AppendLine('                    const columnNames = ["Category", "Type", "Description", "Severity/Score", "Details"];') | Out-Null
+        $htmlBuilder.AppendLine('                    rowData.forEach(function(value, index) {') | Out-Null
+        $htmlBuilder.AppendLine('                        const fieldName = columnNames[index] || "Field " + index;') | Out-Null
+        $htmlBuilder.AppendLine('                        const fieldValue = $("<div>" + value + "</div>").text() || "(empty)";') | Out-Null
+        $htmlBuilder.AppendLine('                        detailHtml += "<div class=\"detail-item\">";') | Out-Null
+        $htmlBuilder.AppendLine('                        detailHtml += "  <div class=\"label\">" + fieldName + "</div>";') | Out-Null
+        $htmlBuilder.AppendLine('                        detailHtml += "  <div class=\"value\">" + fieldValue + "</div>";') | Out-Null
+        $htmlBuilder.AppendLine('                        detailHtml += "</div>";') | Out-Null
+        $htmlBuilder.AppendLine('                    });') | Out-Null
+        $htmlBuilder.AppendLine('                    $("#detailContent").html(detailHtml);') | Out-Null
+        $htmlBuilder.AppendLine('                    $("#rowDetailModal").modal("show");') | Out-Null
+        $htmlBuilder.AppendLine('                }') | Out-Null
+        $htmlBuilder.AppendLine('            });') | Out-Null
+        $htmlBuilder.AppendLine() | Out-Null
+        $htmlBuilder.AppendLine('            // Observe lazy-load elements') | Out-Null
+        $htmlBuilder.AppendLine('            document.querySelectorAll(".lazy-load").forEach(el => {') | Out-Null
+        $htmlBuilder.AppendLine('                lazyLoadObserver.observe(el);') | Out-Null
+        $htmlBuilder.AppendLine('            });') | Out-Null
+        $htmlBuilder.AppendLine() | Out-Null
         $htmlBuilder.AppendLine('            // Theme Management') | Out-Null
         $htmlBuilder.AppendLine('            const root = document.documentElement;') | Out-Null
         $htmlBuilder.AppendLine('            const themeToggle = document.getElementById("themeToggle");') | Out-Null
@@ -1351,8 +1639,11 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('                applyTheme(newTheme);') | Out-Null
         $htmlBuilder.AppendLine('            });') | Out-Null
         $htmlBuilder.AppendLine() | Out-Null
-        $htmlBuilder.AppendLine('            // Initialize DataTable with column filters and export buttons') | Out-Null
-        $htmlBuilder.AppendLine('            var table = $(".table").DataTable({') | Out-Null
+        $htmlBuilder.AppendLine('            // Function to load DataTable (called by lazy loading)') | Out-Null
+        $htmlBuilder.AppendLine('            window.loadDataTable = function() {') | Out-Null
+        $htmlBuilder.AppendLine('                if (dataTableInstance) return; // Already initialized') | Out-Null
+        $htmlBuilder.AppendLine() | Out-Null
+        $htmlBuilder.AppendLine('                dataTableInstance = $(".table").DataTable({') | Out-Null
         $htmlBuilder.AppendLine('                pageLength: 25,') | Out-Null
         $htmlBuilder.AppendLine('                lengthMenu: [[10, 25, 50, 100, 500, -1], ["10 rows", "25 rows", "50 rows", "100 rows", "500 rows", "Show all"]],') | Out-Null
         $htmlBuilder.AppendLine('                order: [[0, "asc"]],') | Out-Null
@@ -1508,13 +1799,15 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('                    if (window.SearchEnhancement) {') | Out-Null
         $htmlBuilder.AppendLine('                        SearchEnhancement.init(table);') | Out-Null
         $htmlBuilder.AppendLine('                    }') | Out-Null
-        $htmlBuilder.AppendLine('                }') | Out-Null
-        $htmlBuilder.AppendLine('            });') | Out-Null
+        $htmlBuilder.AppendLine('                ]') | Out-Null
+        $htmlBuilder.AppendLine('                });') | Out-Null
+        $htmlBuilder.AppendLine('            };') | Out-Null
         $htmlBuilder.AppendLine() | Out-Null
         $htmlBuilder.AppendLine('            // Clear all filters functionality') | Out-Null
         $htmlBuilder.AppendLine('            $(document).on("click", "#clearFiltersBtn", function() {') | Out-Null
+        $htmlBuilder.AppendLine('                if (!dataTableInstance) return;') | Out-Null
         $htmlBuilder.AppendLine('                // Reset all column checkbox filters') | Out-Null
-        $htmlBuilder.AppendLine('                table.columns().every(function() {') | Out-Null
+        $htmlBuilder.AppendLine('                dataTableInstance.columns().every(function() {') | Out-Null
         $htmlBuilder.AppendLine('                    var header = $(this.header());') | Out-Null
         $htmlBuilder.AppendLine('                    // Check all checkboxes in this column') | Out-Null
         $htmlBuilder.AppendLine('                    header.find("input[type=\"checkbox\"]").prop("checked", true);') | Out-Null
@@ -1525,12 +1818,13 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('                    header.find(".filter-text").text(title);') | Out-Null
         $htmlBuilder.AppendLine('                });') | Out-Null
         $htmlBuilder.AppendLine('                // Reset main search and redraw') | Out-Null
-        $htmlBuilder.AppendLine('                table.search("").draw();') | Out-Null
+        $htmlBuilder.AppendLine('                dataTableInstance.search("").draw();') | Out-Null
         $htmlBuilder.AppendLine('            });') | Out-Null
         $htmlBuilder.AppendLine() | Out-Null
         $htmlBuilder.AppendLine('            // Row click handler for detail view') | Out-Null
         $htmlBuilder.AppendLine('            $(".table tbody").on("click", "tr", function() {') | Out-Null
-        $htmlBuilder.AppendLine('                var rowData = table.row(this).data();') | Out-Null
+        $htmlBuilder.AppendLine('                if (!dataTableInstance) return;') | Out-Null
+        $htmlBuilder.AppendLine('                var rowData = dataTableInstance.row(this).data();') | Out-Null
         $htmlBuilder.AppendLine('                if (rowData) {') | Out-Null
         $htmlBuilder.AppendLine('                    showRowDetails(rowData);') | Out-Null
         $htmlBuilder.AppendLine('                }') | Out-Null
@@ -1574,20 +1868,25 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('            let processThumbnailInstance = null;') | Out-Null
         $htmlBuilder.AppendLine('            let operationThumbnailInstance = null;') | Out-Null
         $htmlBuilder.AppendLine() | Out-Null
-        $htmlBuilder.AppendLine('            // Initialize thumbnail charts on page load') | Out-Null
-        $htmlBuilder.AppendLine('            const processThumbnailCanvas = document.getElementById("processThumbnail");') | Out-Null
-        $htmlBuilder.AppendLine('            if (processThumbnailCanvas) {') | Out-Null
-        $htmlBuilder.AppendLine('                const labels = processThumbnailCanvas.dataset.labels.split(",");') | Out-Null
-        $htmlBuilder.AppendLine('                const data = processThumbnailCanvas.dataset.data.split(",").map(Number);') | Out-Null
-        $htmlBuilder.AppendLine('                processThumbnailInstance = createChart(processThumbnailCanvas, labels, data, "bar", colorPalette[0]);') | Out-Null
-        $htmlBuilder.AppendLine('            }') | Out-Null
+        $htmlBuilder.AppendLine('            // Function to load chart thumbnails (called by lazy loading)') | Out-Null
+        $htmlBuilder.AppendLine('            window.loadChartThumbnails = function() {') | Out-Null
+        $htmlBuilder.AppendLine('                if (processThumbnailInstance && operationThumbnailInstance) return; // Already loaded') | Out-Null
         $htmlBuilder.AppendLine() | Out-Null
-        $htmlBuilder.AppendLine('            const operationThumbnailCanvas = document.getElementById("operationThumbnail");') | Out-Null
-        $htmlBuilder.AppendLine('            if (operationThumbnailCanvas) {') | Out-Null
-        $htmlBuilder.AppendLine('                const labels = operationThumbnailCanvas.dataset.labels.split(",");') | Out-Null
-        $htmlBuilder.AppendLine('                const data = operationThumbnailCanvas.dataset.data.split(",").map(Number);') | Out-Null
-        $htmlBuilder.AppendLine('                operationThumbnailInstance = createChart(operationThumbnailCanvas, labels, data, "doughnut", colorPalette[1]);') | Out-Null
-        $htmlBuilder.AppendLine('            }') | Out-Null
+        $htmlBuilder.AppendLine('                // Initialize thumbnail charts') | Out-Null
+        $htmlBuilder.AppendLine('                const processThumbnailCanvas = document.getElementById("processThumbnail");') | Out-Null
+        $htmlBuilder.AppendLine('                if (processThumbnailCanvas && !processThumbnailInstance) {') | Out-Null
+        $htmlBuilder.AppendLine('                    const labels = processThumbnailCanvas.dataset.labels.split(",");') | Out-Null
+        $htmlBuilder.AppendLine('                    const data = processThumbnailCanvas.dataset.data.split(",").map(Number);') | Out-Null
+        $htmlBuilder.AppendLine('                    processThumbnailInstance = createChart(processThumbnailCanvas, labels, data, "bar", colorPalette[0]);') | Out-Null
+        $htmlBuilder.AppendLine('                }') | Out-Null
+        $htmlBuilder.AppendLine() | Out-Null
+        $htmlBuilder.AppendLine('                const operationThumbnailCanvas = document.getElementById("operationThumbnail");') | Out-Null
+        $htmlBuilder.AppendLine('                if (operationThumbnailCanvas && !operationThumbnailInstance) {') | Out-Null
+        $htmlBuilder.AppendLine('                    const labels = operationThumbnailCanvas.dataset.labels.split(",");') | Out-Null
+        $htmlBuilder.AppendLine('                    const data = operationThumbnailCanvas.dataset.data.split(",").map(Number);') | Out-Null
+        $htmlBuilder.AppendLine('                    operationThumbnailInstance = createChart(operationThumbnailCanvas, labels, data, "doughnut", colorPalette[1]);') | Out-Null
+        $htmlBuilder.AppendLine('                }') | Out-Null
+        $htmlBuilder.AppendLine('            };') | Out-Null
         $htmlBuilder.AppendLine() | Out-Null
         $htmlBuilder.AppendLine('            // Initialize charts when modals open') | Out-Null
         $htmlBuilder.AppendLine('            $("#processChartModal").on("shown.bs.modal", function() {') | Out-Null
@@ -1644,7 +1943,7 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('                                callbacks: {') | Out-Null
         $htmlBuilder.AppendLine('                                    label: function(context) {') | Out-Null
         $htmlBuilder.AppendLine('                                        const label = context.label || "";') | Out-Null
-        $htmlBuilder.AppendLine('                                        const value = context.parsed.y || context.parsed;') | Out-Null
+        $htmlBuilder.AppendLine('                                        const value = context.parsed.x || context.parsed;') | Out-Null
         $htmlBuilder.AppendLine('                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);') | Out-Null
         $htmlBuilder.AppendLine('                                        const percentage = ((value / total) * 100).toFixed(1);') | Out-Null
         $htmlBuilder.AppendLine('                                        return label + ": " + value.toLocaleString() + " (" + percentage + "%)";') | Out-Null
@@ -1652,8 +1951,9 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('                                }') | Out-Null
         $htmlBuilder.AppendLine('                            }') | Out-Null
         $htmlBuilder.AppendLine('                        },') | Out-Null
+        $htmlBuilder.AppendLine('                        indexAxis: ''y'',') | Out-Null
         $htmlBuilder.AppendLine('                        scales: type === "bar" ? {') | Out-Null
-        $htmlBuilder.AppendLine('                            y: { beginAtZero: true, ticks: { precision: 0 } }') | Out-Null
+        $htmlBuilder.AppendLine('                            x: { beginAtZero: true, ticks: { precision: 0 } }') | Out-Null
         $htmlBuilder.AppendLine('                        } : {}') | Out-Null
         $htmlBuilder.AppendLine('                    }') | Out-Null
         $htmlBuilder.AppendLine('                });') | Out-Null
