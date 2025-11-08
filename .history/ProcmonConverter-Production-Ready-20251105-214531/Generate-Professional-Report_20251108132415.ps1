@@ -442,20 +442,8 @@ function Prepare-ReportData {
 
     try {
         # Validate input data
-        if (-not $DataObject) {
-            throw "DataObject is null"
-        }
-        if (-not $DataObject.Summary) {
-            throw "DataObject.Summary is null"
-        }
-        if (-not $DataObject.Summary.ProcessTypes) {
-            throw "DataObject.Summary.ProcessTypes is null"
-        }
-        if (-not $DataObject.Summary.Operations) {
-            throw "DataObject.Summary.Operations is null"
-        }
-        if (-not $DataObject.Events) {
-            throw "DataObject.Events is null"
+        if (-not $DataObject -or -not $DataObject.Summary -or -not $DataObject.Summary.ProcessTypes -or -not $DataObject.Summary.Operations) {
+            throw "Invalid data object structure"
         }
 
         $topProcesses = Get-TopProcesses -ProcessTypes $DataObject.Summary.ProcessTypes -TopCount $Config.TopItemsCount
@@ -506,7 +494,6 @@ function Prepare-ReportData {
     }
     catch {
         Write-Error "Failed to prepare report data: $($_.Exception.Message)"
-        Write-Error "Stack trace: $($_.ScriptStackTrace)"
         return $null
     }
 }

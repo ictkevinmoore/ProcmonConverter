@@ -441,23 +441,6 @@ function Prepare-ReportData {
     param([hashtable]$DataObject, [hashtable]$Config)
 
     try {
-        # Validate input data
-        if (-not $DataObject) {
-            throw "DataObject is null"
-        }
-        if (-not $DataObject.Summary) {
-            throw "DataObject.Summary is null"
-        }
-        if (-not $DataObject.Summary.ProcessTypes) {
-            throw "DataObject.Summary.ProcessTypes is null"
-        }
-        if (-not $DataObject.Summary.Operations) {
-            throw "DataObject.Summary.Operations is null"
-        }
-        if (-not $DataObject.Events) {
-            throw "DataObject.Events is null"
-        }
-
         $topProcesses = Get-TopProcesses -ProcessTypes $DataObject.Summary.ProcessTypes -TopCount $Config.TopItemsCount
         $topOperations = Get-TopOperations -Operations $DataObject.Summary.Operations -TopCount $Config.TopItemsCount
         $sampleEvents = Get-SampleEvents -Events $DataObject.Events -MaxSampleSize $Config.MaxSampleSize
@@ -466,27 +449,20 @@ function Prepare-ReportData {
         $processChartData = Get-ChartLabelsAndData -Items $topProcesses
         $operationChartData = Get-ChartLabelsAndData -Items $topOperations
 
-        # Ensure chart data is never null
-        if (-not $processChartData -or $topProcesses.Count -eq 0) {
+        if ($topProcesses.Count -eq 0) {
             $processChartData = @{ Labels = "'No Data'"; Data = "0" }
         }
-        if (-not $operationChartData -or $topOperations.Count -eq 0) {
+        if ($topOperations.Count -eq 0) {
             $operationChartData = @{ Labels = "'No Data'"; Data = "0" }
         }
 
-        $filesProcessed = if ($DataObject.ContainsKey('FilesProcessed') -and $DataObject.FilesProcessed -ne $null) {
+        $filesProcessed = if ($DataObject.ContainsKey('FilesProcessed')) {
             $DataObject.FilesProcessed
         } else {
             1
         }
 
-        $totalRecords = if ($DataObject.ContainsKey('TotalRecords') -and $DataObject.TotalRecords -ne $null) {
-            $DataObject.TotalRecords
-        } else {
-            0
-        }
-
-        $result = @{
+        return @{
             TopProcesses = $topProcesses
             TopOperations = $topOperations
             SampleEvents = $sampleEvents
@@ -495,18 +471,15 @@ function Prepare-ReportData {
             ProcessChartData = $processChartData
             OperationChartData = $operationChartData
             Summary = @{
-                TotalRecords = $totalRecords
+                TotalRecords = $DataObject.TotalRecords
                 FilesProcessed = $filesProcessed
                 UniqueProcesses = $DataObject.Summary.ProcessTypes.Count
                 OperationTypes = $DataObject.Summary.Operations.Count
             }
         }
-
-        return $result
     }
     catch {
         Write-Error "Failed to prepare report data: $($_.Exception.Message)"
-        Write-Error "Stack trace: $($_.ScriptStackTrace)"
         return $null
     }
 }
@@ -919,27 +892,6 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('            </div>') | Out-Null
         $htmlBuilder.AppendLine('        </div>') | Out-Null
 
-        # Event Detail Modal
-        $htmlBuilder.AppendLine('        <!-- Event Detail Modal -->') | Out-Null
-        $htmlBuilder.AppendLine('        <div class="modal fade detail-modal" id="eventDetailModal" tabindex="-1">') | Out-Null
-        $htmlBuilder.AppendLine('            <div class="modal-dialog modal-lg">') | Out-Null
-        $htmlBuilder.AppendLine('                <div class="modal-content">') | Out-Null
-        $htmlBuilder.AppendLine('                    <div class="modal-header">') | Out-Null
-        $htmlBuilder.AppendLine('                        <h5 class="modal-title"><i class="fas fa-info-circle me-2"></i>Event Details</h5>') | Out-Null
-        $htmlBuilder.AppendLine('                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>') | Out-Null
-        $htmlBuilder.AppendLine('                    </div>') | Out-Null
-        $htmlBuilder.AppendLine('                    <div class="modal-body">') | Out-Null
-        $htmlBuilder.AppendLine('                        <div id="eventDetailContent">') | Out-Null
-        $htmlBuilder.AppendLine('                            <!-- Content will be populated by JavaScript -->') | Out-Null
-        $htmlBuilder.AppendLine('                        </div>') | Out-Null
-        $htmlBuilder.AppendLine('                    </div>') | Out-Null
-        $htmlBuilder.AppendLine('                    <div class="modal-footer">') | Out-Null
-        $htmlBuilder.AppendLine('                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>') | Out-Null
-        $htmlBuilder.AppendLine('                    </div>') | Out-Null
-        $htmlBuilder.AppendLine('                </div>') | Out-Null
-        $htmlBuilder.AppendLine('            </div>') | Out-Null
-        $htmlBuilder.AppendLine('        </div>') | Out-Null
-
         # Footer
         $htmlBuilder.AppendLine('    <!-- Footer -->') | Out-Null
         $htmlBuilder.AppendLine('    <div class="footer" style="padding: 2rem; text-align: center; margin-top: 3rem;">') | Out-Null
@@ -1000,29 +952,18 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('                applyTheme(newTheme);') | Out-Null
         $htmlBuilder.AppendLine('            });') | Out-Null
 
-        # DataTable initialization - Remove duplicate initialization
-        # The eventsTable is now initialized later in the Events Table section
-
-        # Fix CSV export to include all 7 columns
-        $htmlBuilder.AppendLine('            // Fix CSV export to include all columns') | Out-Null
-        $htmlBuilder.AppendLine('            $.fn.dataTable.ext.buttons.csvHtml5 = {') | Out-Null
-        $htmlBuilder.AppendLine('                className: "buttons-csv buttons-html5",') | Out-Null
-        $htmlBuilder.AppendLine('                text: function (dt) {') | Out-Null
-        $htmlBuilder.AppendLine('                    return dt.i18n("buttons.csv", "CSV");') | Out-Null
-        $htmlBuilder.AppendLine('                },') | Out-Null
-        $htmlBuilder.AppendLine('                action: function (e, dt, button, config) {') | Out-Null
-        $htmlBuilder.AppendLine('                    var data = dt.buttons.exportData();') | Out-Null
-        $htmlBuilder.AppendLine('                    var csv = "Time,Process,PID,Operation,Path,Result,Details\\n";') | Out-Null
-        $htmlBuilder.AppendLine('                    data.body.forEach(function(row) {') | Out-Null
-        $htmlBuilder.AppendLine('                        // Clean HTML tags and extract all 7 columns') | Out-Null
-        $htmlBuilder.AppendLine('                        var cleanRow = row.map(function(cell) {') | Out-Null
-        $htmlBuilder.AppendLine('                            return cell.replace(/<[^>]*>/g, "").replace(/"/g, "\\"");') | Out-Null
-        $htmlBuilder.AppendLine('                        });') | Out-Null
-        $htmlBuilder.AppendLine('                        csv += "\\"" + cleanRow.join("\\",\\"") + "\\"\\n";') | Out-Null
-        $htmlBuilder.AppendLine('                    });') | Out-Null
-        $htmlBuilder.AppendLine('                    $.fn.dataTable.fileSave(new Blob([csv], {type: "text/csv"}), "events-export.csv");') | Out-Null
-        $htmlBuilder.AppendLine('                }') | Out-Null
-        $htmlBuilder.AppendLine('            };') | Out-Null
+        # DataTable initialization
+        $htmlBuilder.AppendLine('            // Initialize DataTable') | Out-Null
+        $htmlBuilder.AppendFormat('            $("#eventsTable").DataTable({{') | Out-Null
+        $htmlBuilder.AppendLine() | Out-Null
+        $htmlBuilder.AppendFormat('                pageLength: {0},', $Config.PageLength) | Out-Null
+        $htmlBuilder.AppendLine() | Out-Null
+        $htmlBuilder.AppendLine('                responsive: true,') | Out-Null
+        $htmlBuilder.AppendLine('                dom: "Bfrtip",') | Out-Null
+        $htmlBuilder.AppendLine('                buttons: [') | Out-Null
+        $htmlBuilder.AppendLine('                    "excel", "csv", "pdf", "print"') | Out-Null
+        $htmlBuilder.AppendLine('                ]') | Out-Null
+        $htmlBuilder.AppendLine('            });') | Out-Null
 
         # Analysis Table initialization
         $htmlBuilder.AppendLine('            // Initialize Analysis Table with advanced features') | Out-Null
@@ -1436,7 +1377,7 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('            });') | Out-Null
         $htmlBuilder.AppendLine('            // Event details modal function') | Out-Null
         $htmlBuilder.AppendLine('            function showEventDetails(eventId) {') | Out-Null
-        $htmlBuilder.AppendLine('                const rowData = eventsTable.row("[data-event-id=" + eventId + "]").data();') | Out-Null
+        $htmlBuilder.AppendLine('                const rowData = eventsTable.row("[data-event-id=\'" + eventId + "\']").data();') | Out-Null
         $htmlBuilder.AppendLine('                if (rowData) {') | Out-Null
         $htmlBuilder.AppendLine('                    var time = rowData[1];') | Out-Null
         $htmlBuilder.AppendLine('                    var process = rowData[2].replace(/<[^>]*>/g, "");') | Out-Null
@@ -1462,7 +1403,7 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('                if (selectedEvents.length > 0) {') | Out-Null
         $htmlBuilder.AppendLine('                    var csvContent = "Time,Process,PID,Operation,Path,Result\\n";') | Out-Null
         $htmlBuilder.AppendLine('                    selectedEvents.forEach(function(eventId) {') | Out-Null
-        $htmlBuilder.AppendLine('                        const rowData = eventsTable.row("[data-event-id=" + eventId + "]").data();') | Out-Null
+        $htmlBuilder.AppendLine('                        const rowData = eventsTable.row("[data-event-id=\'" + eventId + "\']").data();') | Out-Null
         $htmlBuilder.AppendLine('                        if (rowData) {') | Out-Null
         $htmlBuilder.AppendLine('                            var time = rowData[1];') | Out-Null
         $htmlBuilder.AppendLine('                            var process = rowData[2].replace(/<[^>]*>/g, "");') | Out-Null

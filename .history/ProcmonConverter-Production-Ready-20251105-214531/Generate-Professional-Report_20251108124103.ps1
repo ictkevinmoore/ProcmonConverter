@@ -441,23 +441,6 @@ function Prepare-ReportData {
     param([hashtable]$DataObject, [hashtable]$Config)
 
     try {
-        # Validate input data
-        if (-not $DataObject) {
-            throw "DataObject is null"
-        }
-        if (-not $DataObject.Summary) {
-            throw "DataObject.Summary is null"
-        }
-        if (-not $DataObject.Summary.ProcessTypes) {
-            throw "DataObject.Summary.ProcessTypes is null"
-        }
-        if (-not $DataObject.Summary.Operations) {
-            throw "DataObject.Summary.Operations is null"
-        }
-        if (-not $DataObject.Events) {
-            throw "DataObject.Events is null"
-        }
-
         $topProcesses = Get-TopProcesses -ProcessTypes $DataObject.Summary.ProcessTypes -TopCount $Config.TopItemsCount
         $topOperations = Get-TopOperations -Operations $DataObject.Summary.Operations -TopCount $Config.TopItemsCount
         $sampleEvents = Get-SampleEvents -Events $DataObject.Events -MaxSampleSize $Config.MaxSampleSize
@@ -466,47 +449,36 @@ function Prepare-ReportData {
         $processChartData = Get-ChartLabelsAndData -Items $topProcesses
         $operationChartData = Get-ChartLabelsAndData -Items $topOperations
 
-        # Ensure chart data is never null
-        if (-not $processChartData -or $topProcesses.Count -eq 0) {
+        if ($topProcesses.Count -eq 0) {
             $processChartData = @{ Labels = "'No Data'"; Data = "0" }
         }
-        if (-not $operationChartData -or $topOperations.Count -eq 0) {
+        if ($topOperations.Count -eq 0) {
             $operationChartData = @{ Labels = "'No Data'"; Data = "0" }
         }
 
-        $filesProcessed = if ($DataObject.ContainsKey('FilesProcessed') -and $DataObject.FilesProcessed -ne $null) {
+        $filesProcessed = if ($DataObject.ContainsKey('FilesProcessed')) {
             $DataObject.FilesProcessed
         } else {
             1
         }
 
-        $totalRecords = if ($DataObject.ContainsKey('TotalRecords') -and $DataObject.TotalRecords -ne $null) {
-            $DataObject.TotalRecords
-        } else {
-            0
-        }
-
-        $result = @{
+        return @{
             TopProcesses = $topProcesses
             TopOperations = $topOperations
             SampleEvents = $sampleEvents
-            AllEvents = $DataObject.Events  # Include ALL events for the Details tab
             Insights = $insights
             ProcessChartData = $processChartData
             OperationChartData = $operationChartData
             Summary = @{
-                TotalRecords = $totalRecords
+                TotalRecords = $DataObject.TotalRecords
                 FilesProcessed = $filesProcessed
                 UniqueProcesses = $DataObject.Summary.ProcessTypes.Count
                 OperationTypes = $DataObject.Summary.Operations.Count
             }
         }
-
-        return $result
     }
     catch {
         Write-Error "Failed to prepare report data: $($_.Exception.Message)"
-        Write-Error "Stack trace: $($_.ScriptStackTrace)"
         return $null
     }
 }
@@ -770,77 +742,40 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('                </div>') | Out-Null
         $htmlBuilder.AppendLine('            </div>') | Out-Null
 
-        # Events Tab (Details) - Shows ALL CSV Data
-        $htmlBuilder.AppendLine('            <!-- Events Tab (Details) -->') | Out-Null
+        # Events Tab
+        $htmlBuilder.AppendLine('            <!-- Events Tab -->') | Out-Null
         $htmlBuilder.AppendLine('            <div class="tab-pane fade" id="tab-events" role="tabpanel">') | Out-Null
         $htmlBuilder.AppendLine('                <div class="table-container">') | Out-Null
-        $htmlBuilder.AppendFormat('                    <h4>Complete Event Details - All CSV Records ({0:N0} total records)</h4>', $ReportData.AllEvents.Count) | Out-Null
+        $htmlBuilder.AppendFormat('                    <h4>Event Details ({0} records)</h4>', $ReportData.SampleEvents.Count) | Out-Null
         $htmlBuilder.AppendLine() | Out-Null
-        $htmlBuilder.AppendLine('                    <div class="mb-3">') | Out-Null
-        $htmlBuilder.AppendLine('                        <div class="row g-2 align-items-center">') | Out-Null
-        $htmlBuilder.AppendLine('                            <div class="col-auto">') | Out-Null
-        $htmlBuilder.AppendLine('                                <button id="clearEventFiltersBtn" class="btn btn-warning btn-sm">') | Out-Null
-        $htmlBuilder.AppendLine('                                    <i class="fas fa-eraser"></i> Clear All Filters') | Out-Null
-        $htmlBuilder.AppendLine('                                </button>') | Out-Null
-        $htmlBuilder.AppendLine('                            </div>') | Out-Null
-        $htmlBuilder.AppendLine('                            <div class="col-auto">') | Out-Null
-        $htmlBuilder.AppendLine('                                <button id="selectAllEventsBtn" class="btn btn-info btn-sm">') | Out-Null
-        $htmlBuilder.AppendLine('                                    <i class="fas fa-check-square"></i> Select All Visible') | Out-Null
-        $htmlBuilder.AppendLine('                                </button>') | Out-Null
-        $htmlBuilder.AppendLine('                            </div>') | Out-Null
-        $htmlBuilder.AppendLine('                            <div class="col-auto">') | Out-Null
-        $htmlBuilder.AppendLine('                                <button id="exportSelectedEventsBtn" class="btn btn-success btn-sm" disabled>') | Out-Null
-        $htmlBuilder.AppendLine('                                    <i class="fas fa-download"></i> Export Selected (<span id="selectedCount">0</span>)') | Out-Null
-        $htmlBuilder.AppendLine('                                </button>') | Out-Null
-        $htmlBuilder.AppendLine('                            </div>') | Out-Null
-        $htmlBuilder.AppendLine('                            <div class="col">') | Out-Null
-        $htmlBuilder.AppendLine('                                <small class="text-muted">Click any row for detailed information. Use column filters for advanced search.</small>') | Out-Null
-        $htmlBuilder.AppendLine('                            </div>') | Out-Null
-        $htmlBuilder.AppendLine('                        </div>') | Out-Null
-        $htmlBuilder.AppendLine('                    </div>') | Out-Null
         $htmlBuilder.AppendLine('                    <table id="eventsTable" class="table table-striped table-hover">') | Out-Null
         $htmlBuilder.AppendLine('                        <thead>') | Out-Null
         $htmlBuilder.AppendLine('                            <tr>') | Out-Null
-        $htmlBuilder.AppendLine('                                <th><input type="checkbox" id="selectAllCheckbox"></th>') | Out-Null
         $htmlBuilder.AppendLine('                                <th>Time</th>') | Out-Null
         $htmlBuilder.AppendLine('                                <th>Process</th>') | Out-Null
         $htmlBuilder.AppendLine('                                <th>PID</th>') | Out-Null
         $htmlBuilder.AppendLine('                                <th>Operation</th>') | Out-Null
         $htmlBuilder.AppendLine('                                <th>Path</th>') | Out-Null
         $htmlBuilder.AppendLine('                                <th>Result</th>') | Out-Null
-        $htmlBuilder.AppendLine('                                <th>Details</th>') | Out-Null
         $htmlBuilder.AppendLine('                            </tr>') | Out-Null
         $htmlBuilder.AppendLine('                        </thead>') | Out-Null
         $htmlBuilder.AppendLine('                        <tbody>') | Out-Null
 
-        # Add ALL events (not just sample) - limit to reasonable size for performance
-        $maxEventsToShow = [Math]::Min($ReportData.AllEvents.Count, 50000)  # Show up to 50K events
-        for ($i = 0; $i -lt $maxEventsToShow; $i++) {
-            $event = $ReportData.AllEvents[$i]
-            $rowClass = if ($event.Result -eq "SUCCESS") { "table-success" } elseif ($event.Result -eq "ACCESS DENIED") { "table-danger" } else { "" }
-            $htmlBuilder.AppendFormat('                            <tr class="event-row {0}" data-event-id="{1}">', $rowClass, $i) | Out-Null
-            $htmlBuilder.AppendLine() | Out-Null
-            $htmlBuilder.AppendLine('                                <td><input type="checkbox" class="event-checkbox"></td>') | Out-Null
+        # Add sample events
+        foreach ($event in $ReportData.SampleEvents) {
+            $htmlBuilder.AppendLine('                            <tr>') | Out-Null
             $htmlBuilder.AppendFormat('                                <td>{0}</td>', (ConvertTo-SafeHTML -Text $event.TimeOfDay)) | Out-Null
             $htmlBuilder.AppendLine() | Out-Null
-            $htmlBuilder.AppendFormat('                                <td><strong>{0}</strong></td>', (ConvertTo-SafeHTML -Text $event.ProcessName)) | Out-Null
+            $htmlBuilder.AppendFormat('                                <td>{0}</td>', (ConvertTo-SafeHTML -Text $event.ProcessName)) | Out-Null
             $htmlBuilder.AppendLine() | Out-Null
             $htmlBuilder.AppendFormat('                                <td>{0}</td>', (ConvertTo-SafeHTML -Text $event.PID)) | Out-Null
             $htmlBuilder.AppendLine() | Out-Null
-            $htmlBuilder.AppendFormat('                                <td><span class="badge bg-secondary">{0}</span></td>', (ConvertTo-SafeHTML -Text $event.Operation)) | Out-Null
+            $htmlBuilder.AppendFormat('                                <td>{0}</td>', (ConvertTo-SafeHTML -Text $event.Operation)) | Out-Null
             $htmlBuilder.AppendLine() | Out-Null
-            $htmlBuilder.AppendFormat('                                <td class="text-truncate" style="max-width: 300px;" title="{0}">{0}</td>', (ConvertTo-SafeHTML -Text $event.Path)) | Out-Null
+            $htmlBuilder.AppendFormat('                                <td>{0}</td>', (ConvertTo-SafeHTML -Text $event.Path)) | Out-Null
             $htmlBuilder.AppendLine() | Out-Null
-            $resultClass = switch ($event.Result) {
-                "SUCCESS" { "success" }
-                "ACCESS DENIED" { "danger" }
-                "NAME NOT FOUND" { "warning" }
-                "NO SUCH FILE" { "warning" }
-                default { "secondary" }
-            }
-            $htmlBuilder.AppendFormat('                                <td><span class="badge bg-{0}">{1}</span></td>', $resultClass, (ConvertTo-SafeHTML -Text $event.Result)) | Out-Null
+            $htmlBuilder.AppendFormat('                                <td>{0}</td>', (ConvertTo-SafeHTML -Text $event.Result)) | Out-Null
             $htmlBuilder.AppendLine() | Out-Null
-            $htmlBuilder.AppendLine('                                <td><button class="btn btn-sm btn-outline-primary event-detail-btn" data-event-id="' + $i + '"><i class="fas fa-info-circle"></i></button></td>') | Out-Null
             $htmlBuilder.AppendLine('                            </tr>') | Out-Null
         }
 
@@ -919,27 +854,6 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('            </div>') | Out-Null
         $htmlBuilder.AppendLine('        </div>') | Out-Null
 
-        # Event Detail Modal
-        $htmlBuilder.AppendLine('        <!-- Event Detail Modal -->') | Out-Null
-        $htmlBuilder.AppendLine('        <div class="modal fade detail-modal" id="eventDetailModal" tabindex="-1">') | Out-Null
-        $htmlBuilder.AppendLine('            <div class="modal-dialog modal-lg">') | Out-Null
-        $htmlBuilder.AppendLine('                <div class="modal-content">') | Out-Null
-        $htmlBuilder.AppendLine('                    <div class="modal-header">') | Out-Null
-        $htmlBuilder.AppendLine('                        <h5 class="modal-title"><i class="fas fa-info-circle me-2"></i>Event Details</h5>') | Out-Null
-        $htmlBuilder.AppendLine('                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>') | Out-Null
-        $htmlBuilder.AppendLine('                    </div>') | Out-Null
-        $htmlBuilder.AppendLine('                    <div class="modal-body">') | Out-Null
-        $htmlBuilder.AppendLine('                        <div id="eventDetailContent">') | Out-Null
-        $htmlBuilder.AppendLine('                            <!-- Content will be populated by JavaScript -->') | Out-Null
-        $htmlBuilder.AppendLine('                        </div>') | Out-Null
-        $htmlBuilder.AppendLine('                    </div>') | Out-Null
-        $htmlBuilder.AppendLine('                    <div class="modal-footer">') | Out-Null
-        $htmlBuilder.AppendLine('                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>') | Out-Null
-        $htmlBuilder.AppendLine('                    </div>') | Out-Null
-        $htmlBuilder.AppendLine('                </div>') | Out-Null
-        $htmlBuilder.AppendLine('            </div>') | Out-Null
-        $htmlBuilder.AppendLine('        </div>') | Out-Null
-
         # Footer
         $htmlBuilder.AppendLine('    <!-- Footer -->') | Out-Null
         $htmlBuilder.AppendLine('    <div class="footer" style="padding: 2rem; text-align: center; margin-top: 3rem;">') | Out-Null
@@ -1000,29 +914,18 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('                applyTheme(newTheme);') | Out-Null
         $htmlBuilder.AppendLine('            });') | Out-Null
 
-        # DataTable initialization - Remove duplicate initialization
-        # The eventsTable is now initialized later in the Events Table section
-
-        # Fix CSV export to include all 7 columns
-        $htmlBuilder.AppendLine('            // Fix CSV export to include all columns') | Out-Null
-        $htmlBuilder.AppendLine('            $.fn.dataTable.ext.buttons.csvHtml5 = {') | Out-Null
-        $htmlBuilder.AppendLine('                className: "buttons-csv buttons-html5",') | Out-Null
-        $htmlBuilder.AppendLine('                text: function (dt) {') | Out-Null
-        $htmlBuilder.AppendLine('                    return dt.i18n("buttons.csv", "CSV");') | Out-Null
-        $htmlBuilder.AppendLine('                },') | Out-Null
-        $htmlBuilder.AppendLine('                action: function (e, dt, button, config) {') | Out-Null
-        $htmlBuilder.AppendLine('                    var data = dt.buttons.exportData();') | Out-Null
-        $htmlBuilder.AppendLine('                    var csv = "Time,Process,PID,Operation,Path,Result,Details\\n";') | Out-Null
-        $htmlBuilder.AppendLine('                    data.body.forEach(function(row) {') | Out-Null
-        $htmlBuilder.AppendLine('                        // Clean HTML tags and extract all 7 columns') | Out-Null
-        $htmlBuilder.AppendLine('                        var cleanRow = row.map(function(cell) {') | Out-Null
-        $htmlBuilder.AppendLine('                            return cell.replace(/<[^>]*>/g, "").replace(/"/g, "\\"");') | Out-Null
-        $htmlBuilder.AppendLine('                        });') | Out-Null
-        $htmlBuilder.AppendLine('                        csv += "\\"" + cleanRow.join("\\",\\"") + "\\"\\n";') | Out-Null
-        $htmlBuilder.AppendLine('                    });') | Out-Null
-        $htmlBuilder.AppendLine('                    $.fn.dataTable.fileSave(new Blob([csv], {type: "text/csv"}), "events-export.csv");') | Out-Null
-        $htmlBuilder.AppendLine('                }') | Out-Null
-        $htmlBuilder.AppendLine('            };') | Out-Null
+        # DataTable initialization
+        $htmlBuilder.AppendLine('            // Initialize DataTable') | Out-Null
+        $htmlBuilder.AppendFormat('            $("#eventsTable").DataTable({{') | Out-Null
+        $htmlBuilder.AppendLine() | Out-Null
+        $htmlBuilder.AppendFormat('                pageLength: {0},', $Config.PageLength) | Out-Null
+        $htmlBuilder.AppendLine() | Out-Null
+        $htmlBuilder.AppendLine('                responsive: true,') | Out-Null
+        $htmlBuilder.AppendLine('                dom: "Bfrtip",') | Out-Null
+        $htmlBuilder.AppendLine('                buttons: [') | Out-Null
+        $htmlBuilder.AppendLine('                    "excel", "csv", "pdf", "print"') | Out-Null
+        $htmlBuilder.AppendLine('                ]') | Out-Null
+        $htmlBuilder.AppendLine('            });') | Out-Null
 
         # Analysis Table initialization
         $htmlBuilder.AppendLine('            // Initialize Analysis Table with advanced features') | Out-Null
@@ -1153,333 +1056,7 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('                detailHtml += "</div>";') | Out-Null
         $htmlBuilder.AppendLine('                $("#analysisDetailContent").html(detailHtml);') | Out-Null
         $htmlBuilder.AppendLine('                $("#analysisDetailModal").modal("show");') | Out-Null
-        $htmlBuilder.AppendLine('            });') | Out-Null
-
-        # Clear filters button handler
-        $htmlBuilder.AppendLine('            // Clear filters button handler') | Out-Null
-        $htmlBuilder.AppendLine('            $("#clearFiltersBtn").on("click", function() {') | Out-Null
-        $htmlBuilder.AppendLine('                analysisTable.search("").columns().search("").draw();') | Out-Null
-        $htmlBuilder.AppendLine('                // Reset all filter checkboxes') | Out-Null
-        $htmlBuilder.AppendLine('                $(".filter-options input[type=\"checkbox\"]").prop("checked", true);') | Out-Null
-        $htmlBuilder.AppendLine('                // Reset filter button texts') | Out-Null
-        $htmlBuilder.AppendLine('                $(".column-filter-btn .filter-text").each(function() {') | Out-Null
-        $htmlBuilder.AppendLine('                    var title = $(this).text().replace(/ \\(\\d+\\)$/, "");') | Out-Null
-        $htmlBuilder.AppendLine('                    $(this).text(title);') | Out-Null
-        $htmlBuilder.AppendLine('                });') | Out-Null
-        $htmlBuilder.AppendLine('            });') | Out-Null
-
-        # Chart type switching functionality
-        $htmlBuilder.AppendLine('            // Chart type switching functionality') | Out-Null
-        $htmlBuilder.AppendLine('            let processChart = null;') | Out-Null
-        $htmlBuilder.AppendLine('            let operationChart = null;') | Out-Null
-        $htmlBuilder.AppendLine('            const processCanvas = document.getElementById("processChart");') | Out-Null
-        $htmlBuilder.AppendLine('            const operationCanvas = document.getElementById("operationChart");') | Out-Null
-        $htmlBuilder.AppendLine('            const processLabels = processCanvas ? processCanvas.dataset.labels.split(",") : [];') | Out-Null
-        $htmlBuilder.AppendLine('            const processData = processCanvas ? processCanvas.dataset.data.split(",").map(Number) : [];') | Out-Null
-        $htmlBuilder.AppendLine('            const operationLabels = operationCanvas ? operationCanvas.dataset.labels.split(",") : [];') | Out-Null
-        $htmlBuilder.AppendLine('            const operationData = operationCanvas ? operationCanvas.dataset.data.split(",").map(Number) : [];') | Out-Null
-
-        # Chart creation functions
-        $htmlBuilder.AppendLine('            // Chart creation functions') | Out-Null
-        $htmlBuilder.AppendLine('            function createProcessChart(type) {') | Out-Null
-        $htmlBuilder.AppendLine('                if (processChart) processChart.destroy();') | Out-Null
-        $htmlBuilder.AppendLine('                const config = {') | Out-Null
-        $htmlBuilder.AppendLine('                    type: type,') | Out-Null
-        $htmlBuilder.AppendLine('                    data: {') | Out-Null
-        $htmlBuilder.AppendLine('                        labels: processLabels,') | Out-Null
-        $htmlBuilder.AppendLine('                        datasets: [{') | Out-Null
-        $htmlBuilder.AppendLine('                            label: "Event Count",') | Out-Null
-        $htmlBuilder.AppendLine('                            data: processData,') | Out-Null
-        $htmlBuilder.AppendLine('                            backgroundColor: type === "pie" ? colorPalette.slice(0, processData.length) : colorPalette[0],') | Out-Null
-        $htmlBuilder.AppendLine('                            borderColor: type === "pie" ? colorPalette.slice(0, processData.length) : colorPalette[0],') | Out-Null
-        $htmlBuilder.AppendLine('                            borderWidth: 2') | Out-Null
-        $htmlBuilder.AppendLine('                        }]') | Out-Null
-        $htmlBuilder.AppendLine('                    },') | Out-Null
-        $htmlBuilder.AppendLine('                    options: {') | Out-Null
-        $htmlBuilder.AppendLine('                        responsive: true,') | Out-Null
-        $htmlBuilder.AppendLine('                        maintainAspectRatio: false,') | Out-Null
-        $htmlBuilder.AppendLine('                        plugins: {') | Out-Null
-        $htmlBuilder.AppendLine('                            legend: { position: "bottom" },') | Out-Null
-        $htmlBuilder.AppendLine('                            tooltip: {') | Out-Null
-        $htmlBuilder.AppendLine('                                callbacks: {') | Out-Null
-        $htmlBuilder.AppendLine('                                    label: function(context) {') | Out-Null
-        $htmlBuilder.AppendLine('                                        return context.label + ": " + context.parsed.toLocaleString();') | Out-Null
-        $htmlBuilder.AppendLine('                                    }') | Out-Null
-        $htmlBuilder.AppendLine('                                }') | Out-Null
-        $htmlBuilder.AppendLine('                            }') | Out-Null
-        $htmlBuilder.AppendLine('                        }') | Out-Null
-        $htmlBuilder.AppendLine('                    }') | Out-Null
-        $htmlBuilder.AppendLine('                };') | Out-Null
-        $htmlBuilder.AppendLine('                processChart = new Chart(processCanvas, config);') | Out-Null
         $htmlBuilder.AppendLine('            }') | Out-Null
-
-        $htmlBuilder.AppendLine('            function createOperationChart(type) {') | Out-Null
-        $htmlBuilder.AppendLine('                if (operationChart) operationChart.destroy();') | Out-Null
-        $htmlBuilder.AppendLine('                const config = {') | Out-Null
-        $htmlBuilder.AppendLine('                    type: type,') | Out-Null
-        $htmlBuilder.AppendLine('                    data: {') | Out-Null
-        $htmlBuilder.AppendLine('                        labels: operationLabels,') | Out-Null
-        $htmlBuilder.AppendLine('                        datasets: [{') | Out-Null
-        $htmlBuilder.AppendLine('                            label: "Event Count",') | Out-Null
-        $htmlBuilder.AppendLine('                            data: operationData,') | Out-Null
-        $htmlBuilder.AppendLine('                            backgroundColor: type === "bar" ? colorPalette[1] : colorPalette.slice(0, operationData.length),') | Out-Null
-        $htmlBuilder.AppendLine('                            borderColor: type === "bar" ? colorPalette[1] : colorPalette.slice(0, operationData.length),') | Out-Null
-        $htmlBuilder.AppendLine('                            borderWidth: 2') | Out-Null
-        $htmlBuilder.AppendLine('                        }]') | Out-Null
-        $htmlBuilder.AppendLine('                    },') | Out-Null
-        $htmlBuilder.AppendLine('                    options: {') | Out-Null
-        $htmlBuilder.AppendLine('                        responsive: true,') | Out-Null
-        $htmlBuilder.AppendLine('                        maintainAspectRatio: false,') | Out-Null
-        $htmlBuilder.AppendLine('                        plugins: {') | Out-Null
-        $htmlBuilder.AppendLine('                            legend: { position: "bottom" },') | Out-Null
-        $htmlBuilder.AppendLine('                            tooltip: {') | Out-Null
-        $htmlBuilder.AppendLine('                                callbacks: {') | Out-Null
-        $htmlBuilder.AppendLine('                                    label: function(context) {') | Out-Null
-        $htmlBuilder.AppendLine('                                        return context.label + ": " + context.parsed.toLocaleString();') | Out-Null
-        $htmlBuilder.AppendLine('                                    }') | Out-Null
-        $htmlBuilder.AppendLine('                                }') | Out-Null
-        $htmlBuilder.AppendLine('                            }') | Out-Null
-        $htmlBuilder.AppendLine('                        }') | Out-Null
-        $htmlBuilder.AppendLine('                    }') | Out-Null
-        $htmlBuilder.AppendLine('                };') | Out-Null
-        $htmlBuilder.AppendLine('                operationChart = new Chart(operationCanvas, config);') | Out-Null
-        $htmlBuilder.AppendLine('            }') | Out-Null
-
-        # Chart button handlers
-        $htmlBuilder.AppendLine('            // Chart button handlers') | Out-Null
-        $htmlBuilder.AppendLine('            $(".chart-type-btn").on("click", function() {') | Out-Null
-        $htmlBuilder.AppendLine('                const chartType = $(this).data("chart");') | Out-Null
-        $htmlBuilder.AppendLine('                const type = $(this).data("type");') | Out-Null
-        $htmlBuilder.AppendLine('                $(this).siblings().removeClass("active");') | Out-Null
-        $htmlBuilder.AppendLine('                $(this).addClass("active");') | Out-Null
-        $htmlBuilder.AppendLine('                if (chartType === "process") {') | Out-Null
-        $htmlBuilder.AppendLine('                    createProcessChart(type);') | Out-Null
-        $htmlBuilder.AppendLine('                } else if (chartType === "operation") {') | Out-Null
-        $htmlBuilder.AppendLine('                    createOperationChart(type);') | Out-Null
-        $htmlBuilder.AppendLine('                }') | Out-Null
-        $htmlBuilder.AppendLine('            });') | Out-Null
-
-        # Chart download handlers
-        $htmlBuilder.AppendLine('            // Chart download handlers') | Out-Null
-        $htmlBuilder.AppendLine('            $("#downloadProcessChart").on("click", function() {') | Out-Null
-        $htmlBuilder.AppendLine('                if (processChart) {') | Out-Null
-        $htmlBuilder.AppendLine('                    const link = document.createElement("a");') | Out-Null
-        $htmlBuilder.AppendLine('                    link.download = "process-chart.png";') | Out-Null
-        $htmlBuilder.AppendLine('                    link.href = processChart.toBase64Image();') | Out-Null
-        $htmlBuilder.AppendLine('                    link.click();') | Out-Null
-        $htmlBuilder.AppendLine('                }') | Out-Null
-        $htmlBuilder.AppendLine('            });') | Out-Null
-
-        $htmlBuilder.AppendLine('            $("#downloadOperationChart").on("click", function() {') | Out-Null
-        $htmlBuilder.AppendLine('                if (operationChart) {') | Out-Null
-        $htmlBuilder.AppendLine('                    const link = document.createElement("a");') | Out-Null
-        $htmlBuilder.AppendLine('                    link.download = "operation-chart.png";') | Out-Null
-        $htmlBuilder.AppendLine('                    link.href = operationChart.toBase64Image();') | Out-Null
-        $htmlBuilder.AppendLine('                    link.click();') | Out-Null
-        $htmlBuilder.AppendLine('                }') | Out-Null
-        $htmlBuilder.AppendLine('            });') | Out-Null
-
-        # Initialize charts with default types
-        $htmlBuilder.AppendLine('            // Initialize charts with default types') | Out-Null
-        $htmlBuilder.AppendLine('            if (processCanvas) createProcessChart("bar");') | Out-Null
-        $htmlBuilder.AppendLine('            if (operationCanvas) createOperationChart("doughnut");') | Out-Null
-
-        # Events Table (Details Tab) functionality
-        $htmlBuilder.AppendLine('            // Initialize Events Table (Details Tab)') | Out-Null
-        $htmlBuilder.AppendLine('            const eventsTable = $("#eventsTable").DataTable({') | Out-Null
-        $htmlBuilder.AppendFormat('                pageLength: {0},', $Config.PageLength) | Out-Null
-        $htmlBuilder.AppendLine() | Out-Null
-        $htmlBuilder.AppendLine('                responsive: true,') | Out-Null
-        $htmlBuilder.AppendLine('                order: [[1, "asc"]],') | Out-Null
-        $htmlBuilder.AppendLine('                dom: "Bfrtip",') | Out-Null
-        $htmlBuilder.AppendLine('                buttons: [') | Out-Null
-        $htmlBuilder.AppendLine('                    "excel", "csv", "pdf", "print"') | Out-Null
-        $htmlBuilder.AppendLine('                ],') | Out-Null
-        $htmlBuilder.AppendLine('                columnDefs: [') | Out-Null
-        $htmlBuilder.AppendLine('                    { orderable: false, targets: 0 },') | Out-Null
-        $htmlBuilder.AppendLine('                    { orderable: false, targets: 7 }') | Out-Null
-        $htmlBuilder.AppendLine('                ],') | Out-Null
-        $htmlBuilder.AppendLine('                initComplete: function() {') | Out-Null
-        $htmlBuilder.AppendLine('                    // Add column filter dropdowns for Events table') | Out-Null
-        $htmlBuilder.AppendLine('                    this.api().columns([1,2,3,4,5,6]).every(function(colIdx) {') | Out-Null
-        $htmlBuilder.AppendLine('                        var column = this;') | Out-Null
-        $htmlBuilder.AppendLine('                        var title = $(column.header()).text();') | Out-Null
-        $htmlBuilder.AppendLine('                        // Create filter container') | Out-Null
-        $htmlBuilder.AppendLine('                        var filterContainer = $("<div style=\"position: relative;\"></div>").appendTo($(column.header()).empty());') | Out-Null
-        $htmlBuilder.AppendLine('                        // Create filter button') | Out-Null
-        $htmlBuilder.AppendLine('                        var filterBtn = $("<button class=\"column-filter-btn\" type=\"button\">" +') | Out-Null
-        $htmlBuilder.AppendLine('                            "<span class=\"filter-text\">" + title + "</span>" +') | Out-Null
-        $htmlBuilder.AppendLine('                            "<i class=\"fas fa-chevron-down\"></i>" +') | Out-Null
-        $htmlBuilder.AppendLine('                            "</button>").appendTo(filterContainer);') | Out-Null
-        $htmlBuilder.AppendLine('                        // Create dropdown') | Out-Null
-        $htmlBuilder.AppendLine('                        var dropdown = $("<div class=\"column-filter-dropdown\"></div>").appendTo(filterContainer);') | Out-Null
-        $htmlBuilder.AppendLine('                        // Add search box') | Out-Null
-        $htmlBuilder.AppendLine('                        var searchBox = $("<div class=\"filter-search\"><input type=\"text\" placeholder=\"Search...\" class=\"filter-search-input\"></div>").appendTo(dropdown);') | Out-Null
-        $htmlBuilder.AppendLine('                        // Create options container') | Out-Null
-        $htmlBuilder.AppendLine('                        var optionsContainer = $("<div class=\"filter-options\"></div>").appendTo(dropdown);') | Out-Null
-        $htmlBuilder.AppendLine('                        // Get unique values sorted') | Out-Null
-        $htmlBuilder.AppendLine('                        var uniqueValues = [];') | Out-Null
-        $htmlBuilder.AppendLine('                        column.data().unique().sort().each(function(d) {') | Out-Null
-        $htmlBuilder.AppendLine('                            if (d) uniqueValues.push(d.replace(/<[^>]*>/g, ""));') | Out-Null
-        $htmlBuilder.AppendLine('                        });') | Out-Null
-        $htmlBuilder.AppendLine('                        // Add checkbox options') | Out-Null
-        $htmlBuilder.AppendLine('                        uniqueValues.forEach(function(value) {') | Out-Null
-        $htmlBuilder.AppendLine('                            var optionId = "events_filter_" + colIdx + "_" + value.replace(/[^a-zA-Z0-9]/g, "_");') | Out-Null
-        $htmlBuilder.AppendLine('                            var option = $("<div class=\"filter-option\">" +') | Out-Null
-        $htmlBuilder.AppendLine('                                "<input type=\"checkbox\" id=\"" + optionId + "\" value=\"" + value + "\" checked>" +') | Out-Null
-        $htmlBuilder.AppendLine('                                "<label for=\"" + optionId + "\">" + value + "</label>" +') | Out-Null
-        $htmlBuilder.AppendLine('                                "</div>");') | Out-Null
-        $htmlBuilder.AppendLine('                            optionsContainer.append(option);') | Out-Null
-        $htmlBuilder.AppendLine('                        });') | Out-Null
-        $htmlBuilder.AppendLine('                        // Add action buttons') | Out-Null
-        $htmlBuilder.AppendLine('                        var actions = $("<div class=\"filter-actions\">" +') | Out-Null
-        $htmlBuilder.AppendLine('                            "<button class=\"select-all-btn\">Select All</button>" +') | Out-Null
-        $htmlBuilder.AppendLine('                            "<button class=\"clear-btn\">Clear</button>" +') | Out-Null
-        $htmlBuilder.AppendLine('                            "</div>").appendTo(dropdown);') | Out-Null
-        $htmlBuilder.AppendLine('                        // Toggle dropdown') | Out-Null
-        $htmlBuilder.AppendLine('                        filterBtn.on("click", function(e) {') | Out-Null
-        $htmlBuilder.AppendLine('                            e.stopPropagation();') | Out-Null
-        $htmlBuilder.AppendLine('                            $(".column-filter-dropdown").not(dropdown).removeClass("show");') | Out-Null
-        $htmlBuilder.AppendLine('                            dropdown.toggleClass("show");') | Out-Null
-        $htmlBuilder.AppendLine('                        });') | Out-Null
-        $htmlBuilder.AppendLine('                        // Search functionality') | Out-Null
-        $htmlBuilder.AppendLine('                        searchBox.find("input").on("keyup", function() {') | Out-Null
-        $htmlBuilder.AppendLine('                            var searchTerm = $(this).val().toLowerCase();') | Out-Null
-        $htmlBuilder.AppendLine('                            optionsContainer.find(".filter-option").each(function() {') | Out-Null
-        $htmlBuilder.AppendLine('                            var text = $(this).find("label").text().toLowerCase();') | Out-Null
-        $htmlBuilder.AppendLine('                            $(this).toggle(text.indexOf(searchTerm) > -1);') | Out-Null
-        $htmlBuilder.AppendLine('                        });') | Out-Null
-        $htmlBuilder.AppendLine('                        });') | Out-Null
-        $htmlBuilder.AppendLine('                        // Checkbox change handler') | Out-Null
-        $htmlBuilder.AppendLine('                        optionsContainer.on("change", "input[type=\"checkbox\"]", function() {') | Out-Null
-        $htmlBuilder.AppendLine('                            var selectedValues = [];') | Out-Null
-        $htmlBuilder.AppendLine('                            optionsContainer.find("input[type=\"checkbox\"]:checked").each(function() {') | Out-Null
-        $htmlBuilder.AppendLine('                                selectedValues.push($.fn.dataTable.util.escapeRegex($(this).val()));') | Out-Null
-        $htmlBuilder.AppendLine('                            });') | Out-Null
-        $htmlBuilder.AppendLine('                            // Update filter') | Out-Null
-        $htmlBuilder.AppendLine('                            if (selectedValues.length === uniqueValues.length || selectedValues.length === 0) {') | Out-Null
-        $htmlBuilder.AppendLine('                                column.search("").draw();') | Out-Null
-        $htmlBuilder.AppendLine('                            } else {') | Out-Null
-        $htmlBuilder.AppendLine('                                column.search("^(" + selectedValues.join("|") + ")$", true, false).draw();') | Out-Null
-        $htmlBuilder.AppendLine('                            }') | Out-Null
-        $htmlBuilder.AppendLine('                            // Update button text with count') | Out-Null
-        $htmlBuilder.AppendLine('                            var checkedCount = optionsContainer.find("input[type=\"checkbox\"]:checked").length;') | Out-Null
-        $htmlBuilder.AppendLine('                            if (checkedCount < uniqueValues.length) {') | Out-Null
-        $htmlBuilder.AppendLine('                                filterBtn.find(".filter-text").html(title + " <span class=\"filter-count\">" + checkedCount + "</span>");') | Out-Null
-        $htmlBuilder.AppendLine('                            } else {') | Out-Null
-        $htmlBuilder.AppendLine('                                filterBtn.find(".filter-text").text(title);') | Out-Null
-        $htmlBuilder.AppendLine('                            }') | Out-Null
-        $htmlBuilder.AppendLine('                        });') | Out-Null
-        $htmlBuilder.AppendLine('                        // Select All button') | Out-Null
-        $htmlBuilder.AppendLine('                        actions.find(".select-all-btn").on("click", function(e) {') | Out-Null
-        $htmlBuilder.AppendLine('                            e.stopPropagation();') | Out-Null
-        $htmlBuilder.AppendLine('                            optionsContainer.find("input[type=\"checkbox\"]").prop("checked", true).first().trigger("change");') | Out-Null
-        $htmlBuilder.AppendLine('                        });') | Out-Null
-        $htmlBuilder.AppendLine('                        // Clear button') | Out-Null
-        $htmlBuilder.AppendLine('                        actions.find(".clear-btn").on("click", function(e) {') | Out-Null
-        $htmlBuilder.AppendLine('                            e.stopPropagation();') | Out-Null
-        $htmlBuilder.AppendLine('                            optionsContainer.find("input[type=\"checkbox\"]").prop("checked", false).first().trigger("change");') | Out-Null
-        $htmlBuilder.AppendLine('                        });') | Out-Null
-        $htmlBuilder.AppendLine('                    });') | Out-Null
-        $htmlBuilder.AppendLine('                }') | Out-Null
-        $htmlBuilder.AppendLine('            });') | Out-Null
-
-        # Events table row selection and detail modal
-        $htmlBuilder.AppendLine('            // Events table row selection and detail modal') | Out-Null
-        $htmlBuilder.AppendLine('            let selectedEvents = [];') | Out-Null
-        $htmlBuilder.AppendLine('            // Select all checkbox handler') | Out-Null
-        $htmlBuilder.AppendLine('            $("#selectAllCheckbox").on("change", function() {') | Out-Null
-        $htmlBuilder.AppendLine('                const isChecked = $(this).prop("checked");') | Out-Null
-        $htmlBuilder.AppendLine('                $(".event-checkbox").prop("checked", isChecked);') | Out-Null
-        $htmlBuilder.AppendLine('                updateSelectedEvents();') | Out-Null
-        $htmlBuilder.AppendLine('            });') | Out-Null
-        $htmlBuilder.AppendLine('            // Individual checkbox handler') | Out-Null
-        $htmlBuilder.AppendLine('            $(document).on("change", ".event-checkbox", function() {') | Out-Null
-        $htmlBuilder.AppendLine('                updateSelectedEvents();') | Out-Null
-        $htmlBuilder.AppendLine('                // Update select all checkbox state') | Out-Null
-        $htmlBuilder.AppendLine('                const totalCheckboxes = $(".event-checkbox").length;') | Out-Null
-        $htmlBuilder.AppendLine('                const checkedCheckboxes = $(".event-checkbox:checked").length;') | Out-Null
-        $htmlBuilder.AppendLine('                $("#selectAllCheckbox").prop("indeterminate", checkedCheckboxes > 0 && checkedCheckboxes < totalCheckboxes);') | Out-Null
-        $htmlBuilder.AppendLine('                $("#selectAllCheckbox").prop("checked", checkedCheckboxes === totalCheckboxes);') | Out-Null
-        $htmlBuilder.AppendLine('            });') | Out-Null
-        $htmlBuilder.AppendLine('            // Update selected events counter') | Out-Null
-        $htmlBuilder.AppendLine('            function updateSelectedEvents() {') | Out-Null
-        $htmlBuilder.AppendLine('                selectedEvents = [];') | Out-Null
-        $htmlBuilder.AppendLine('                $(".event-checkbox:checked").each(function() {') | Out-Null
-        $htmlBuilder.AppendLine('                    const eventId = $(this).closest("tr").data("event-id");') | Out-Null
-        $htmlBuilder.AppendLine('                    selectedEvents.push(eventId);') | Out-Null
-        $htmlBuilder.AppendLine('                });') | Out-Null
-        $htmlBuilder.AppendLine('                $("#selectedCount").text(selectedEvents.length);') | Out-Null
-        $htmlBuilder.AppendLine('                $("#exportSelectedEventsBtn").prop("disabled", selectedEvents.length === 0);') | Out-Null
-        $htmlBuilder.AppendLine('            }') | Out-Null
-        $htmlBuilder.AppendLine('            // Select all visible button') | Out-Null
-        $htmlBuilder.AppendLine('            $("#selectAllEventsBtn").on("click", function() {') | Out-Null
-        $htmlBuilder.AppendLine('                $("#eventsTable tbody tr:visible .event-checkbox").prop("checked", true);') | Out-Null
-        $htmlBuilder.AppendLine('                updateSelectedEvents();') | Out-Null
-        $htmlBuilder.AppendLine('            });') | Out-Null
-        $htmlBuilder.AppendLine('            // Clear event filters button') | Out-Null
-        $htmlBuilder.AppendLine('            $("#clearEventFiltersBtn").on("click", function() {') | Out-Null
-        $htmlBuilder.AppendLine('                eventsTable.search("").columns().search("").draw();') | Out-Null
-        $htmlBuilder.AppendLine('                // Reset all filter checkboxes') | Out-Null
-        $htmlBuilder.AppendLine('                $("#eventsTable .filter-options input[type=\"checkbox\"]").prop("checked", true);') | Out-Null
-        $htmlBuilder.AppendLine('                // Reset filter button texts') | Out-Null
-        $htmlBuilder.AppendLine('                $("#eventsTable .column-filter-btn .filter-text").each(function() {') | Out-Null
-        $htmlBuilder.AppendLine('                    var title = $(this).text().replace(/ \\(\\d+\\)$/, "");') | Out-Null
-        $htmlBuilder.AppendLine('                    $(this).text(title);') | Out-Null
-        $htmlBuilder.AppendLine('                });') | Out-Null
-        $htmlBuilder.AppendLine('            });') | Out-Null
-        $htmlBuilder.AppendLine('            // Event detail button handler') | Out-Null
-        $htmlBuilder.AppendLine('            $(document).on("click", ".event-detail-btn", function(e) {') | Out-Null
-        $htmlBuilder.AppendLine('                e.stopPropagation();') | Out-Null
-        $htmlBuilder.AppendLine('                const eventId = $(this).data("event-id");') | Out-Null
-        $htmlBuilder.AppendLine('                showEventDetails(eventId);') | Out-Null
-        $htmlBuilder.AppendLine('            });') | Out-Null
-        $htmlBuilder.AppendLine('            // Event details modal function') | Out-Null
-        $htmlBuilder.AppendLine('            function showEventDetails(eventId) {') | Out-Null
-        $htmlBuilder.AppendLine('                const rowData = eventsTable.row("[data-event-id=" + eventId + "]").data();') | Out-Null
-        $htmlBuilder.AppendLine('                if (rowData) {') | Out-Null
-        $htmlBuilder.AppendLine('                    var time = rowData[1];') | Out-Null
-        $htmlBuilder.AppendLine('                    var process = rowData[2].replace(/<[^>]*>/g, "");') | Out-Null
-        $htmlBuilder.AppendLine('                    var pid = rowData[3];') | Out-Null
-        $htmlBuilder.AppendLine('                    var operation = rowData[4].replace(/<[^>]*>/g, "");') | Out-Null
-        $htmlBuilder.AppendLine('                    var path = rowData[5].replace(/<[^>]*>/g, "");') | Out-Null
-        $htmlBuilder.AppendLine('                    var result = rowData[6].replace(/<[^>]*>/g, "");') | Out-Null
-        $htmlBuilder.AppendLine('                    var detailHtml = "<div class=\"detail-content\">";') | Out-Null
-        $htmlBuilder.AppendLine('                    detailHtml += "<div class=\"detail-item\"><div class=\"label\">Event Time</div><div class=\"value\">" + time + "</div></div>";') | Out-Null
-        $htmlBuilder.AppendLine('                    detailHtml += "<div class=\"detail-item\"><div class=\"label\">Process Name</div><div class=\"value\">" + process + "</div></div>";') | Out-Null
-        $htmlBuilder.AppendLine('                    detailHtml += "<div class=\"detail-item\"><div class=\"label\">Process ID</div><div class=\"value\">" + pid + "</div></div>";') | Out-Null
-        $htmlBuilder.AppendLine('                    detailHtml += "<div class=\"detail-item\"><div class=\"label\">Operation</div><div class=\"value\">" + operation + "</div></div>";') | Out-Null
-        $htmlBuilder.AppendLine('                    detailHtml += "<div class=\"detail-item\"><div class=\"label\">Path</div><div class=\"value\" style=\"word-break: break-all;\">" + path + "</div></div>";') | Out-Null
-        $htmlBuilder.AppendLine('                    detailHtml += "<div class=\"detail-item\"><div class=\"label\">Result</div><div class=\"value\">" + result + "</div></div>";') | Out-Null
-        $htmlBuilder.AppendLine('                    detailHtml += "<div class=\"detail-item\"><div class=\"label\">Event ID</div><div class=\"value\">" + eventId + "</div></div>";') | Out-Null
-        $htmlBuilder.AppendLine('                    detailHtml += "</div>";') | Out-Null
-        $htmlBuilder.AppendLine('                    $("#eventDetailContent").html(detailHtml);') | Out-Null
-        $htmlBuilder.AppendLine('                    $("#eventDetailModal").modal("show");') | Out-Null
-        $htmlBuilder.AppendLine('                }') | Out-Null
-        $htmlBuilder.AppendLine('            }') | Out-Null
-        $htmlBuilder.AppendLine('            // Export selected events') | Out-Null
-        $htmlBuilder.AppendLine('            $("#exportSelectedEventsBtn").on("click", function() {') | Out-Null
-        $htmlBuilder.AppendLine('                if (selectedEvents.length > 0) {') | Out-Null
-        $htmlBuilder.AppendLine('                    var csvContent = "Time,Process,PID,Operation,Path,Result\\n";') | Out-Null
-        $htmlBuilder.AppendLine('                    selectedEvents.forEach(function(eventId) {') | Out-Null
-        $htmlBuilder.AppendLine('                        const rowData = eventsTable.row("[data-event-id=" + eventId + "]").data();') | Out-Null
-        $htmlBuilder.AppendLine('                        if (rowData) {') | Out-Null
-        $htmlBuilder.AppendLine('                            var time = rowData[1];') | Out-Null
-        $htmlBuilder.AppendLine('                            var process = rowData[2].replace(/<[^>]*>/g, "");') | Out-Null
-        $htmlBuilder.AppendLine('                            var pid = rowData[3];') | Out-Null
-        $htmlBuilder.AppendLine('                            var operation = rowData[4].replace(/<[^>]*>/g, "");') | Out-Null
-        $htmlBuilder.AppendLine('                            var path = rowData[5].replace(/<[^>]*>/g, "");') | Out-Null
-        $htmlBuilder.AppendLine('                            var result = rowData[6].replace(/<[^>]*>/g, "");') | Out-Null
-        $htmlBuilder.AppendLine('                            csvContent += "\"" + time + "\",\"" + process + "\",\"" + pid + "\",\"" + operation + "\",\"" + path + "\",\"" + result + "\"\\n";') | Out-Null
-        $htmlBuilder.AppendLine('                        }') | Out-Null
-        $htmlBuilder.AppendLine('                    });') | Out-Null
-        $htmlBuilder.AppendLine('                    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });') | Out-Null
-        $htmlBuilder.AppendLine('                    const link = document.createElement("a");') | Out-Null
-        $htmlBuilder.AppendLine('                    link.href = URL.createObjectURL(blob);') | Out-Null
-        $htmlBuilder.AppendLine('                    link.download = "selected-events.csv";') | Out-Null
-        $htmlBuilder.AppendLine('                    link.click();') | Out-Null
-        $htmlBuilder.AppendLine('                }') | Out-Null
-        $htmlBuilder.AppendLine('            });') | Out-Null
 
         # Chart initialization
         $htmlBuilder.AppendLine('            // Initialize Charts') | Out-Null

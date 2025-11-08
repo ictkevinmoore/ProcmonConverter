@@ -458,11 +458,22 @@ function Prepare-ReportData {
             throw "DataObject.Events is null"
         }
 
+        Write-Host "DEBUG: Getting top processes..." -ForegroundColor Yellow
         $topProcesses = Get-TopProcesses -ProcessTypes $DataObject.Summary.ProcessTypes -TopCount $Config.TopItemsCount
+        Write-Host "DEBUG: Top processes count: $($topProcesses.Count)" -ForegroundColor Yellow
+
+        Write-Host "DEBUG: Getting top operations..." -ForegroundColor Yellow
         $topOperations = Get-TopOperations -Operations $DataObject.Summary.Operations -TopCount $Config.TopItemsCount
+        Write-Host "DEBUG: Top operations count: $($topOperations.Count)" -ForegroundColor Yellow
+
+        Write-Host "DEBUG: Getting sample events..." -ForegroundColor Yellow
         $sampleEvents = Get-SampleEvents -Events $DataObject.Events -MaxSampleSize $Config.MaxSampleSize
+        Write-Host "DEBUG: Sample events count: $($sampleEvents.Count)" -ForegroundColor Yellow
+
+        Write-Host "DEBUG: Getting insights..." -ForegroundColor Yellow
         $insights = Get-ReportInsights -DataObject $DataObject -TopProcesses $topProcesses -TopOperations $topOperations
 
+        Write-Host "DEBUG: Getting chart data..." -ForegroundColor Yellow
         $processChartData = Get-ChartLabelsAndData -Items $topProcesses
         $operationChartData = Get-ChartLabelsAndData -Items $topOperations
 
@@ -486,6 +497,7 @@ function Prepare-ReportData {
             0
         }
 
+        Write-Host "DEBUG: Creating result object..." -ForegroundColor Yellow
         $result = @{
             TopProcesses = $topProcesses
             TopOperations = $topOperations
@@ -502,6 +514,7 @@ function Prepare-ReportData {
             }
         }
 
+        Write-Host "DEBUG: Returning result..." -ForegroundColor Yellow
         return $result
     }
     catch {

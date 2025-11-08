@@ -441,23 +441,6 @@ function Prepare-ReportData {
     param([hashtable]$DataObject, [hashtable]$Config)
 
     try {
-        # Validate input data
-        if (-not $DataObject) {
-            throw "DataObject is null"
-        }
-        if (-not $DataObject.Summary) {
-            throw "DataObject.Summary is null"
-        }
-        if (-not $DataObject.Summary.ProcessTypes) {
-            throw "DataObject.Summary.ProcessTypes is null"
-        }
-        if (-not $DataObject.Summary.Operations) {
-            throw "DataObject.Summary.Operations is null"
-        }
-        if (-not $DataObject.Events) {
-            throw "DataObject.Events is null"
-        }
-
         $topProcesses = Get-TopProcesses -ProcessTypes $DataObject.Summary.ProcessTypes -TopCount $Config.TopItemsCount
         $topOperations = Get-TopOperations -Operations $DataObject.Summary.Operations -TopCount $Config.TopItemsCount
         $sampleEvents = Get-SampleEvents -Events $DataObject.Events -MaxSampleSize $Config.MaxSampleSize
@@ -466,27 +449,20 @@ function Prepare-ReportData {
         $processChartData = Get-ChartLabelsAndData -Items $topProcesses
         $operationChartData = Get-ChartLabelsAndData -Items $topOperations
 
-        # Ensure chart data is never null
-        if (-not $processChartData -or $topProcesses.Count -eq 0) {
+        if ($topProcesses.Count -eq 0) {
             $processChartData = @{ Labels = "'No Data'"; Data = "0" }
         }
-        if (-not $operationChartData -or $topOperations.Count -eq 0) {
+        if ($topOperations.Count -eq 0) {
             $operationChartData = @{ Labels = "'No Data'"; Data = "0" }
         }
 
-        $filesProcessed = if ($DataObject.ContainsKey('FilesProcessed') -and $DataObject.FilesProcessed -ne $null) {
+        $filesProcessed = if ($DataObject.ContainsKey('FilesProcessed')) {
             $DataObject.FilesProcessed
         } else {
             1
         }
 
-        $totalRecords = if ($DataObject.ContainsKey('TotalRecords') -and $DataObject.TotalRecords -ne $null) {
-            $DataObject.TotalRecords
-        } else {
-            0
-        }
-
-        $result = @{
+        return @{
             TopProcesses = $topProcesses
             TopOperations = $topOperations
             SampleEvents = $sampleEvents
@@ -495,18 +471,15 @@ function Prepare-ReportData {
             ProcessChartData = $processChartData
             OperationChartData = $operationChartData
             Summary = @{
-                TotalRecords = $totalRecords
+                TotalRecords = $DataObject.TotalRecords
                 FilesProcessed = $filesProcessed
                 UniqueProcesses = $DataObject.Summary.ProcessTypes.Count
                 OperationTypes = $DataObject.Summary.Operations.Count
             }
         }
-
-        return $result
     }
     catch {
         Write-Error "Failed to prepare report data: $($_.Exception.Message)"
-        Write-Error "Stack trace: $($_.ScriptStackTrace)"
         return $null
     }
 }
