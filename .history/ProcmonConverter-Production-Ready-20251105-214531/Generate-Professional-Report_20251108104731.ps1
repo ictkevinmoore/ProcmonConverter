@@ -1773,7 +1773,7 @@ function Format-InsightsList {
     $html = ""
     foreach ($insight in $Insights) {
         $encodedInsight = [System.Web.HttpUtility]::HtmlEncode($insight)
-        $html += "<li class='list-group-item insight-clickable' data-insight-type='executive' data-insight-id='$($encodedInsight.GetHashCode())'><i class='fas fa-lightbulb insight-icon'></i><span class='insight-text'>$encodedInsight</span><i class='fas fa-chevron-right insight-arrow'></i></li>"
+        $html += "<li class=`"list-group-item insight-clickable`" data-insight-type=`"executive`" data-insight-id=`"$($encodedInsight.GetHashCode())`"><i class=`"fas fa-lightbulb insight-icon`"></i><span class=`"insight-text`">$encodedInsight</span><i class=`"fas fa-chevron-right insight-arrow`"></i></li>"
     }
     return $html
 }

@@ -1,0 +1,184 @@
+<!-- Tab 1: Executive Summary -->
+<div class="tab-pane fade show active" id="tab-summary" role="tabpanel">
+    <div class="row g-4">
+        <div class="col-md-12">
+            <div class="table-container">
+                <h3><i class="fas fa-briefcase me-2"></i>Executive Summary</h3>
+                <div class="alert alert-info"><strong>Health Score:</strong> {{HealthScore}}/100</div>
+                <h5 class="mt-4">Key Insights</h5>
+                <ul class="list-group">
+                    {{Insights}}
+                </ul>
+                <h5 class="mt-4">Recommendations</h5>
+                <ul class="list-group">
+                    {{Recommendations}}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab 2: Pattern Recognition -->
+<div class="tab-pane fade" id="tab-patterns" role="tabpanel">
+    <div class="row g-4">
+        <div class="col-md-12">
+            <div class="table-container">
+                <h3><i class="fas fa-brain me-2"></i>Pattern Recognition Analysis</h3>
+                <p class="lead">Detected {{PatternCount}} patterns across the dataset</p>
+                <h5 class="mt-4">Detected Patterns</h5>
+                <div class="row">
+                    {{Patterns}}
+                </div>
+                <h5 class="mt-4">Process Clusters</h5>
+                <div class="row">
+                    {{ProcessClusters}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab 3: Advanced Analytics -->
+<div class="tab-pane fade" id="tab-analytics" role="tabpanel">
+    <div class="row g-4">
+        <div class="col-md-12">
+            <div class="table-container">
+                <h3><i class="fas fa-chart-line me-2"></i>Advanced Analytics</h3>
+                <div class="row mb-4">
+                    <div class="col-md-3"><div class="metric-card"><div class="value">{{TotalEvents}}</div><div class="label">Total Events</div></div></div>
+                    <div class="col-md-3"><div class="metric-card"><div class="value">{{ErrorRate}}</div><div class="label">Error Rate</div></div></div>
+                    <div class="col-md-3"><div class="metric-card"><div class="value">{{AnomaliesCount}}</div><div class="label">Anomalies Detected</div></div></div>
+                    <div class="col-md-3"><div class="metric-card"><div class="value">{{RiskLevel}}</div><div class="label">Risk Level</div></div></div>
+                </div>
+                <h5 class="mt-4">Anomaly Detection Results</h5>
+                {{Anomalies}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab 4: ML Analytics -->
+<div class="tab-pane fade" id="tab-ml" role="tabpanel">
+    <div class="row g-4">
+        <div class="col-md-12">
+            <div class="table-container">
+                <h3><i class="fas fa-robot me-2"></i>Machine Learning Analytics</h3>
+                <p class="lead">Combined ML/AI insights from pattern recognition and advanced analytics engines</p>
+                <h5 class="mt-4">ML Predictions & Insights</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="alert alert-primary">
+                            <h6>Temporal Analysis</h6>
+                            <p><strong>Trend:</strong> {{TrendDirection}}</p>
+                            <p><strong>Seasonality:</strong> {{Seasonality}}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="alert alert-success">
+                            <h6>Risk Assessment</h6>
+                            <p><strong>Overall Risk:</strong> {{OverallRisk}}</p>
+                            <p><strong>Risk Score:</strong> {{RiskScore}}/100</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab 5: Event Details -->
+<div class="tab-pane fade" id="tab-events" role="tabpanel">
+    <div class="table-container">
+        <h4>Event Details (Showing first {{SampleSize}} records)</h4>
+        <table class="table table-striped">
+            <thead><tr><th>#</th>{{TableHeaders}}</tr></thead>
+            <tbody>{{TableRows}}</tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Tab 6: Charts -->
+<div class="tab-pane fade" id="tab-charts" role="tabpanel">
+    <div class="chart-container">
+        <h3 class="mb-3"><i class="fas fa-chart-bar me-2"></i>Data Visualizations</h3>
+        <div class="chart-thumbnail-container">
+            <div class="chart-thumbnail" data-bs-toggle="modal" data-bs-target="#processChartModal">
+                <h5><i class="fas fa-chart-bar me-2"></i>Process Distribution <span class="chart-thumbnail-badge">Click to expand</span></h5>
+                <canvas id="processThumbnail" data-labels="{{ProcessLabels}}" data-data="{{ProcessData}}"></canvas>
+            </div>
+            <div class="chart-thumbnail" data-bs-toggle="modal" data-bs-target="#operationChartModal">
+                <h5><i class="fas fa-chart-pie me-2"></i>Operation Distribution <span class="chart-thumbnail-badge">Click to expand</span></h5>
+                <canvas id="operationThumbnail" data-labels="{{OperationLabels}}" data-data="{{OperationData}}"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart Modals -->
+<!-- Process Chart Modal -->
+<div class="modal fade" id="processChartModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Top Processes Distribution</h5>
+                <div class="btn-group btn-group-sm ms-3" role="group">
+                    <button type="button" class="btn btn-outline-primary chart-type-btn" data-chart="process" data-type="bar">Bar</button>
+                    <button type="button" class="btn btn-outline-primary chart-type-btn" data-chart="process" data-type="pie">Pie</button>
+                    <button type="button" class="btn btn-outline-primary chart-type-btn" data-chart="process" data-type="doughnut">Doughnut</button>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <canvas id="processChart" data-labels="{{ProcessLabels}}" data-data="{{ProcessData}}" style="max-height: 500px;"></canvas>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="downloadProcessChart"><i class="fas fa-download"></i> Download PNG</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Operation Chart Modal -->
+<div class="modal fade" id="operationChartModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Top Operations Distribution</h5>
+                <div class="btn-group btn-group-sm ms-3" role="group">
+                    <button type="button" class="btn btn-outline-success chart-type-btn" data-chart="operation" data-type="bar">Bar</button>
+                    <button type="button" class="btn btn-outline-success chart-type-btn" data-chart="operation" data-type="pie">Pie</button>
+                    <button type="button" class="btn btn-outline-success chart-type-btn" data-chart="operation" data-type="doughnut">Doughnut</button>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <canvas id="operationChart" data-labels="{{OperationLabels}}" data-data="{{OperationData}}" style="max-height: 500px;"></canvas>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="downloadOperationChart"><i class="fas fa-download"></i> Download PNG</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row Detail Modal -->
+<div class="modal fade detail-modal" id="rowDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-info-circle"></i> Event Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="detailContent" class="detail-content">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
