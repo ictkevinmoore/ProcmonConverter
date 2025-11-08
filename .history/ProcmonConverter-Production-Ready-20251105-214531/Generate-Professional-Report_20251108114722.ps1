@@ -825,4 +825,3 @@ function New-ReportHTML {
         return $null
     }
 }
-
