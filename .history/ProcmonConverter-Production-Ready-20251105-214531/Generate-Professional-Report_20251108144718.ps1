@@ -1289,8 +1289,7 @@ function New-ReportHTML {
 
         # Events Table (Details Tab) functionality
         $htmlBuilder.AppendLine('            // Initialize Events Table (Details Tab)') | Out-Null
-        $htmlBuilder.AppendLine('            if (!$.fn.DataTable.isDataTable("#eventsTable")) {') | Out-Null
-        $htmlBuilder.AppendLine('                const eventsTable = $("#eventsTable").DataTable({') | Out-Null
+        $htmlBuilder.AppendLine('            const eventsTable = $("#eventsTable").DataTable({') | Out-Null
         $htmlBuilder.AppendFormat('                pageLength: {0},', $Config.PageLength) | Out-Null
         $htmlBuilder.AppendLine() | Out-Null
         $htmlBuilder.AppendLine('                responsive: true,') | Out-Null
@@ -1540,4 +1539,3 @@ function New-ReportHTML {
         return $null
     }
 }
-
