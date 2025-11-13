@@ -803,7 +803,7 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('                            <tr>') | Out-Null
         $htmlBuilder.AppendLine('                                <th><input type="checkbox" id="selectAllCheckbox"></th>') | Out-Null
         $htmlBuilder.AppendLine('                                <th>Time</th>') | Out-Null
-        $htmlBuilder.AppendLine('                                <th>Process Name</th>') | Out-Null
+        $htmlBuilder.AppendLine('                                <th>Process</th>') | Out-Null
         $htmlBuilder.AppendLine('                                <th>PID</th>') | Out-Null
         $htmlBuilder.AppendLine('                                <th>Operation</th>') | Out-Null
         $htmlBuilder.AppendLine('                                <th>Path</th>') | Out-Null
@@ -1703,4 +1703,3 @@ function New-ReportHTML {
         return $null
     }
 }
-
