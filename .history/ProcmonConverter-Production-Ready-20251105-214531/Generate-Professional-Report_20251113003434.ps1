@@ -1223,96 +1223,49 @@ function New-ReportHTML {
         $htmlBuilder.AppendLine('            const operationLabels = operationCanvas ? operationCanvas.dataset.labels.split(",") : [];') | Out-Null
         $htmlBuilder.AppendLine('            const operationData = operationCanvas ? operationCanvas.dataset.data.split(",").map(Number) : [];') | Out-Null
 
-        # Chart creation functions with enhanced styling
-        $htmlBuilder.AppendLine('            // Chart creation functions with professional gradients and animations') | Out-Null
+        # Chart creation functions
+        $htmlBuilder.AppendLine('            // Chart creation functions') | Out-Null
         $htmlBuilder.AppendLine('            function createProcessChart(type) {') | Out-Null
         $htmlBuilder.AppendLine('                if (processChart) processChart.destroy();') | Out-Null
-        $htmlBuilder.AppendLine('                const actualType = (type === "area") ? "line" : type;') | Out-Null
-        $htmlBuilder.AppendLine('                const isPieType = (type === "pie" || type === "doughnut" || type === "polarArea");') | Out-Null
-        $htmlBuilder.AppendLine('                const isLineType = (type === "line" || type === "area");') | Out-Null
-        $htmlBuilder.AppendLine('                const isRadar = (type === "radar");') | Out-Null
-        $htmlBuilder.AppendLine('                // Create gradient for area/line charts') | Out-Null
-        $htmlBuilder.AppendLine('                let gradient = null;') | Out-Null
-        $htmlBuilder.AppendLine('                if (type === "area" && processCanvas) {') | Out-Null
-        $htmlBuilder.AppendLine('                    const ctx = processCanvas.getContext("2d");') | Out-Null
-        $htmlBuilder.AppendLine('                    gradient = ctx.createLinearGradient(0, 0, 0, 400);') | Out-Null
-        $htmlBuilder.AppendLine('                    gradient.addColorStop(0, "rgba(102, 126, 234, 0.5)");') | Out-Null
-        $htmlBuilder.AppendLine('                    gradient.addColorStop(1, "rgba(102, 126, 234, 0.0)");') | Out-Null
-        $htmlBuilder.AppendLine('                }') | Out-Null
+        $htmlBuilder.AppendLine('                const isPieType = (type === "pie" || type === "doughnut");') | Out-Null
+        $htmlBuilder.AppendLine('                const isLineType = (type === "line");') | Out-Null
         $htmlBuilder.AppendLine('                const config = {') | Out-Null
-        $htmlBuilder.AppendLine('                    type: actualType,') | Out-Null
+        $htmlBuilder.AppendLine('                    type: type,') | Out-Null
         $htmlBuilder.AppendLine('                    data: {') | Out-Null
         $htmlBuilder.AppendLine('                        labels: processLabels,') | Out-Null
         $htmlBuilder.AppendLine('                        datasets: [{') | Out-Null
         $htmlBuilder.AppendLine('                            label: "Event Count",') | Out-Null
         $htmlBuilder.AppendLine('                            data: processData,') | Out-Null
-        $htmlBuilder.AppendLine('                            backgroundColor: isPieType ? colorPalette.slice(0, processData.length) : (type === "area" ? gradient : (isLineType ? "rgba(102, 126, 234, 0.2)" : colorPalette[0])),') | Out-Null
-        $htmlBuilder.AppendLine('                            borderColor: isPieType ? colorPalette.slice(0, processData.length) : "rgba(102, 126, 234, 1)",') | Out-Null
+        $htmlBuilder.AppendLine('                            backgroundColor: isPieType ? colorPalette.slice(0, processData.length) : (isLineType ? "rgba(102, 126, 234, 0.2)" : colorPalette[0]),') | Out-Null
+        $htmlBuilder.AppendLine('                            borderColor: isPieType ? colorPalette.slice(0, processData.length) : colorPalette[0],') | Out-Null
         $htmlBuilder.AppendLine('                            borderWidth: 2,') | Out-Null
-        $htmlBuilder.AppendLine('                            fill: type === "area",') | Out-Null
-        $htmlBuilder.AppendLine('                            tension: isLineType ? 0.4 : 0,') | Out-Null
-        $htmlBuilder.AppendLine('                            pointRadius: isLineType ? 4 : 0,') | Out-Null
-        $htmlBuilder.AppendLine('                            pointHoverRadius: isLineType ? 6 : 0,') | Out-Null
-        $htmlBuilder.AppendLine('                            pointBackgroundColor: "rgba(102, 126, 234, 1)",') | Out-Null
-        $htmlBuilder.AppendLine('                            pointBorderColor: "#fff",') | Out-Null
-        $htmlBuilder.AppendLine('                            pointBorderWidth: 2') | Out-Null
+        $htmlBuilder.AppendLine('                            fill: isLineType,') | Out-Null
+        $htmlBuilder.AppendLine('                            tension: isLineType ? 0.4 : 0') | Out-Null
         $htmlBuilder.AppendLine('                        }]') | Out-Null
         $htmlBuilder.AppendLine('                    },') | Out-Null
         $htmlBuilder.AppendLine('                    options: {') | Out-Null
         $htmlBuilder.AppendLine('                        responsive: true,') | Out-Null
         $htmlBuilder.AppendLine('                        maintainAspectRatio: false,') | Out-Null
-        $htmlBuilder.AppendLine('                        animation: {') | Out-Null
-        $htmlBuilder.AppendLine('                            duration: 1000,') | Out-Null
-        $htmlBuilder.AppendLine('                            easing: "easeInOutQuart"') | Out-Null
-        $htmlBuilder.AppendLine('                        },') | Out-Null
         $htmlBuilder.AppendLine('                        plugins: {') | Out-Null
-        $htmlBuilder.AppendLine('                            legend: {') | Out-Null
-        $htmlBuilder.AppendLine('                                position: "bottom",') | Out-Null
-        $htmlBuilder.AppendLine('                                display: true,') | Out-Null
-        $htmlBuilder.AppendLine('                                labels: {') | Out-Null
-        $htmlBuilder.AppendLine('                                    padding: 15,') | Out-Null
-        $htmlBuilder.AppendLine('                                    usePointStyle: true') | Out-Null
-        $htmlBuilder.AppendLine('                                }') | Out-Null
-        $htmlBuilder.AppendLine('                            },') | Out-Null
+        $htmlBuilder.AppendLine('                            legend: { position: "bottom", display: true },') | Out-Null
         $htmlBuilder.AppendLine('                            tooltip: {') | Out-Null
-        $htmlBuilder.AppendLine('                                backgroundColor: "rgba(0, 0, 0, 0.8)",') | Out-Null
-        $htmlBuilder.AppendLine('                                padding: 12,') | Out-Null
-        $htmlBuilder.AppendLine('                                titleFont: { size: 14, weight: "bold" },') | Out-Null
-        $htmlBuilder.AppendLine('                                bodyFont: { size: 13 },') | Out-Null
         $htmlBuilder.AppendLine('                                callbacks: {') | Out-Null
         $htmlBuilder.AppendLine('                                    label: function(context) {') | Out-Null
-        $htmlBuilder.AppendLine('                                        const value = context.parsed.y || context.parsed;') | Out-Null
-        $htmlBuilder.AppendLine('                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);') | Out-Null
-        $htmlBuilder.AppendLine('                                        const percentage = ((value / total) * 100).toFixed(1);') | Out-Null
-        $htmlBuilder.AppendLine('                                        return context.label + ": " + value.toLocaleString() + " (" + percentage + "%)";') | Out-Null
+        $htmlBuilder.AppendLine('                                        return context.label + ": " + (context.parsed.y || context.parsed).toLocaleString();') | Out-Null
         $htmlBuilder.AppendLine('                                    }') | Out-Null
         $htmlBuilder.AppendLine('                                }') | Out-Null
         $htmlBuilder.AppendLine('                            }') | Out-Null
         $htmlBuilder.AppendLine('                        },') | Out-Null
-        $htmlBuilder.AppendLine('                        scales: (isLineType || type === "bar") ? {') | Out-Null
+        $htmlBuilder.AppendLine('                        scales: isLineType || type === "bar" ? {') | Out-Null
         $htmlBuilder.AppendLine('                            y: {') | Out-Null
         $htmlBuilder.AppendLine('                                beginAtZero: true,') | Out-Null
-        $htmlBuilder.AppendLine('                                grid: { color: "rgba(0, 0, 0, 0.05)" },') | Out-Null
-        $htmlBuilder.AppendLine('                                ticks: {') | Out-Null
-        $htmlBuilder.AppendLine('                                    callback: function(value) {') | Out-Null
-        $htmlBuilder.AppendLine('                                        return value.toLocaleString();') | Out-Null
-        $htmlBuilder.AppendLine('                                    }') | Out-Null
-        $htmlBuilder.AppendLine('                                }') | Out-Null
-        $htmlBuilder.AppendLine('                            },') | Out-Null
-        $htmlBuilder.AppendLine('                            x: {') | Out-Null
-        $htmlBuilder.AppendLine('                                grid: { color: "rgba(0, 0, 0, 0.05)" }') | Out-Null
-        $htmlBuilder.AppendLine('                            }') | Out-Null
-        $htmlBuilder.AppendLine('                        } : (isRadar ? {') | Out-Null
-        $htmlBuilder.AppendLine('                            r: {') | Out-Null
-        $htmlBuilder.AppendLine('                                beginAtZero: true,') | Out-Null
-        $htmlBuilder.AppendLine('                                grid: { color: "rgba(0, 0, 0, 0.1)" },') | Out-Null
         $htmlBuilder.AppendLine('                                ticks: {') | Out-Null
         $htmlBuilder.AppendLine('                                    callback: function(value) {') | Out-Null
         $htmlBuilder.AppendLine('                                        return value.toLocaleString();') | Out-Null
         $htmlBuilder.AppendLine('                                    }') | Out-Null
         $htmlBuilder.AppendLine('                                }') | Out-Null
         $htmlBuilder.AppendLine('                            }') | Out-Null
-        $htmlBuilder.AppendLine('                        } : {})') | Out-Null
+        $htmlBuilder.AppendLine('                        } : {}') | Out-Null
         $htmlBuilder.AppendLine('                    }') | Out-Null
         $htmlBuilder.AppendLine('                };') | Out-Null
         $htmlBuilder.AppendLine('                processChart = new Chart(processCanvas, config);') | Out-Null
@@ -1320,92 +1273,45 @@ function New-ReportHTML {
 
         $htmlBuilder.AppendLine('            function createOperationChart(type) {') | Out-Null
         $htmlBuilder.AppendLine('                if (operationChart) operationChart.destroy();') | Out-Null
-        $htmlBuilder.AppendLine('                const actualType = (type === "area") ? "line" : type;') | Out-Null
-        $htmlBuilder.AppendLine('                const isPieType = (type === "pie" || type === "doughnut" || type === "polarArea");') | Out-Null
-        $htmlBuilder.AppendLine('                const isLineType = (type === "line" || type === "area");') | Out-Null
-        $htmlBuilder.AppendLine('                const isRadar = (type === "radar");') | Out-Null
-        $htmlBuilder.AppendLine('                // Create gradient for area/line charts') | Out-Null
-        $htmlBuilder.AppendLine('                let gradient = null;') | Out-Null
-        $htmlBuilder.AppendLine('                if (type === "area" && operationCanvas) {') | Out-Null
-        $htmlBuilder.AppendLine('                    const ctx = operationCanvas.getContext("2d");') | Out-Null
-        $htmlBuilder.AppendLine('                    gradient = ctx.createLinearGradient(0, 0, 0, 400);') | Out-Null
-        $htmlBuilder.AppendLine('                    gradient.addColorStop(0, "rgba(118, 75, 162, 0.5)");') | Out-Null
-        $htmlBuilder.AppendLine('                    gradient.addColorStop(1, "rgba(118, 75, 162, 0.0)");') | Out-Null
-        $htmlBuilder.AppendLine('                }') | Out-Null
+        $htmlBuilder.AppendLine('                const isPieType = (type === "pie" || type === "doughnut");') | Out-Null
+        $htmlBuilder.AppendLine('                const isLineType = (type === "line");') | Out-Null
         $htmlBuilder.AppendLine('                const config = {') | Out-Null
-        $htmlBuilder.AppendLine('                    type: actualType,') | Out-Null
+        $htmlBuilder.AppendLine('                    type: type,') | Out-Null
         $htmlBuilder.AppendLine('                    data: {') | Out-Null
         $htmlBuilder.AppendLine('                        labels: operationLabels,') | Out-Null
         $htmlBuilder.AppendLine('                        datasets: [{') | Out-Null
         $htmlBuilder.AppendLine('                            label: "Event Count",') | Out-Null
         $htmlBuilder.AppendLine('                            data: operationData,') | Out-Null
-        $htmlBuilder.AppendLine('                            backgroundColor: isPieType ? colorPalette.slice(0, operationData.length) : (type === "area" ? gradient : (isLineType ? "rgba(118, 75, 162, 0.2)" : colorPalette[1])),') | Out-Null
-        $htmlBuilder.AppendLine('                            borderColor: isPieType ? colorPalette.slice(0, operationData.length) : "rgba(118, 75, 162, 1)",') | Out-Null
+        $htmlBuilder.AppendLine('                            backgroundColor: isPieType ? colorPalette.slice(0, operationData.length) : (isLineType ? "rgba(118, 75, 162, 0.2)" : colorPalette[1]),') | Out-Null
+        $htmlBuilder.AppendLine('                            borderColor: isPieType ? colorPalette.slice(0, operationData.length) : colorPalette[1],') | Out-Null
         $htmlBuilder.AppendLine('                            borderWidth: 2,') | Out-Null
-        $htmlBuilder.AppendLine('                            fill: type === "area",') | Out-Null
-        $htmlBuilder.AppendLine('                            tension: isLineType ? 0.4 : 0,') | Out-Null
-        $htmlBuilder.AppendLine('                            pointRadius: isLineType ? 4 : 0,') | Out-Null
-        $htmlBuilder.AppendLine('                            pointHoverRadius: isLineType ? 6 : 0,') | Out-Null
-        $htmlBuilder.AppendLine('                            pointBackgroundColor: "rgba(118, 75, 162, 1)",') | Out-Null
-        $htmlBuilder.AppendLine('                            pointBorderColor: "#fff",') | Out-Null
-        $htmlBuilder.AppendLine('                            pointBorderWidth: 2') | Out-Null
+        $htmlBuilder.AppendLine('                            fill: isLineType,') | Out-Null
+        $htmlBuilder.AppendLine('                            tension: isLineType ? 0.4 : 0') | Out-Null
         $htmlBuilder.AppendLine('                        }]') | Out-Null
         $htmlBuilder.AppendLine('                    },') | Out-Null
         $htmlBuilder.AppendLine('                    options: {') | Out-Null
         $htmlBuilder.AppendLine('                        responsive: true,') | Out-Null
         $htmlBuilder.AppendLine('                        maintainAspectRatio: false,') | Out-Null
-        $htmlBuilder.AppendLine('                        animation: {') | Out-Null
-        $htmlBuilder.AppendLine('                            duration: 1000,') | Out-Null
-        $htmlBuilder.AppendLine('                            easing: "easeInOutQuart"') | Out-Null
-        $htmlBuilder.AppendLine('                        },') | Out-Null
         $htmlBuilder.AppendLine('                        plugins: {') | Out-Null
-        $htmlBuilder.AppendLine('                            legend: {') | Out-Null
-        $htmlBuilder.AppendLine('                                position: "bottom",') | Out-Null
-        $htmlBuilder.AppendLine('                                display: true,') | Out-Null
-        $htmlBuilder.AppendLine('                                labels: {') | Out-Null
-        $htmlBuilder.AppendLine('                                    padding: 15,') | Out-Null
-        $htmlBuilder.AppendLine('                                    usePointStyle: true') | Out-Null
-        $htmlBuilder.AppendLine('                                }') | Out-Null
-        $htmlBuilder.AppendLine('                            },') | Out-Null
+        $htmlBuilder.AppendLine('                            legend: { position: "bottom", display: true },') | Out-Null
         $htmlBuilder.AppendLine('                            tooltip: {') | Out-Null
-        $htmlBuilder.AppendLine('                                backgroundColor: "rgba(0, 0, 0, 0.8)",') | Out-Null
-        $htmlBuilder.AppendLine('                                padding: 12,') | Out-Null
-        $htmlBuilder.AppendLine('                                titleFont: { size: 14, weight: "bold" },') | Out-Null
-        $htmlBuilder.AppendLine('                                bodyFont: { size: 13 },') | Out-Null
         $htmlBuilder.AppendLine('                                callbacks: {') | Out-Null
         $htmlBuilder.AppendLine('                                    label: function(context) {') | Out-Null
-        $htmlBuilder.AppendLine('                                        const value = context.parsed.y || context.parsed;') | Out-Null
-        $htmlBuilder.AppendLine('                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);') | Out-Null
-        $htmlBuilder.AppendLine('                                        const percentage = ((value / total) * 100).toFixed(1);') | Out-Null
-        $htmlBuilder.AppendLine('                                        return context.label + ": " + value.toLocaleString() + " (" + percentage + "%)";') | Out-Null
+        $htmlBuilder.AppendLine('                                        return context.label + ": " + (context.parsed.y || context.parsed).toLocaleString();') | Out-Null
         $htmlBuilder.AppendLine('                                    }') | Out-Null
         $htmlBuilder.AppendLine('                                }') | Out-Null
         $htmlBuilder.AppendLine('                            }') | Out-Null
         $htmlBuilder.AppendLine('                        },') | Out-Null
-        $htmlBuilder.AppendLine('                        scales: (isLineType || type === "bar") ? {') | Out-Null
+        $htmlBuilder.AppendLine('                        scales: isLineType || type === "bar" ? {') | Out-Null
         $htmlBuilder.AppendLine('                            y: {') | Out-Null
         $htmlBuilder.AppendLine('                                beginAtZero: true,') | Out-Null
-        $htmlBuilder.AppendLine('                                grid: { color: "rgba(0, 0, 0, 0.05)" },') | Out-Null
-        $htmlBuilder.AppendLine('                                ticks: {') | Out-Null
-        $htmlBuilder.AppendLine('                                    callback: function(value) {') | Out-Null
-        $htmlBuilder.AppendLine('                                        return value.toLocaleString();') | Out-Null
-        $htmlBuilder.AppendLine('                                    }') | Out-Null
-        $htmlBuilder.AppendLine('                                }') | Out-Null
-        $htmlBuilder.AppendLine('                            },') | Out-Null
-        $htmlBuilder.AppendLine('                            x: {') | Out-Null
-        $htmlBuilder.AppendLine('                                grid: { color: "rgba(0, 0, 0, 0.05)" }') | Out-Null
-        $htmlBuilder.AppendLine('                            }') | Out-Null
-        $htmlBuilder.AppendLine('                        } : (isRadar ? {') | Out-Null
-        $htmlBuilder.AppendLine('                            r: {') | Out-Null
-        $htmlBuilder.AppendLine('                                beginAtZero: true,') | Out-Null
-        $htmlBuilder.AppendLine('                                grid: { color: "rgba(0, 0, 0, 0.1)" },') | Out-Null
         $htmlBuilder.AppendLine('                                ticks: {') | Out-Null
         $htmlBuilder.AppendLine('                                    callback: function(value) {') | Out-Null
         $htmlBuilder.AppendLine('                                        return value.toLocaleString();') | Out-Null
         $htmlBuilder.AppendLine('                                    }') | Out-Null
         $htmlBuilder.AppendLine('                                }') | Out-Null
         $htmlBuilder.AppendLine('                            }') | Out-Null
-        $htmlBuilder.AppendLine('                        } : {})') | Out-Null
+        $htmlBuilder.AppendLine('                        } : {}') | Out-Null
         $htmlBuilder.AppendLine('                    }') | Out-Null
         $htmlBuilder.AppendLine('                };') | Out-Null
         $htmlBuilder.AppendLine('                operationChart = new Chart(operationCanvas, config);') | Out-Null
